@@ -380,7 +380,7 @@ QString qSlicerCoreApplicationPrivate::discoverSlicerHomeDirectory()
         }
       }
     }
-  Q_ASSERT(this->isInstalled(slicerHome) ? this->IntDir.isEmpty() : !this->IntDir.isEmpty());
+  //Q_ASSERT(this->isInstalled(slicerHome) ? this->IntDir.isEmpty() : !this->IntDir.isEmpty());
 #endif
 
   return slicerHome;
