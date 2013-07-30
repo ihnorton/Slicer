@@ -17,8 +17,10 @@ message(STATUS "${__${proj}_superbuild_message} - Building without Fortran compi
 
 #message(STATUS "${__indent}Adding project ${proj}")
 
-set(numpy_URL http://svn.slicer.org/Slicer3-lib-mirrors/trunk/numpy-1.4.1.tar.gz)
-set(numpy_MD5 5c7b5349dc3161763f7f366ceb96516b)
+#set(numpy_URL http://svn.slicer.org/Slicer3-lib-mirrors/trunk/numpy-1.4.1.tar.gz)
+#set(numpy_MD5 5c7b5349dc3161763f7f366ceb96516b)
+set(numpy_URL https://pypi.python.org/packages/source/n/numpy/numpy-1.7.1.tar.gz)
+set(numpy_MD5 0ab72b3b83528a7ae79c6df9042d61c6)
 
 #------------------------------------------------------------------------------
 set(NUMPY_DIR "${CMAKE_BINARY_DIR}/${proj}")
@@ -52,9 +54,9 @@ ExternalProject_Add(${proj}
     -P ${CMAKE_CURRENT_BINARY_DIR}/${proj}_make_step.cmake
   INSTALL_COMMAND ${CMAKE_COMMAND}
     -P ${CMAKE_CURRENT_BINARY_DIR}/${proj}_install_step.cmake
-  PATCH_COMMAND ${CMAKE_COMMAND}
-  -DNUMPY_SRC_DIR=${Slicer_BINARY_DIR}/NUMPY
-    -P ${CMAKE_CURRENT_LIST_DIR}/${proj}_patch.cmake
+    #  PATCH_COMMAND ${CMAKE_COMMAND}
+    #-DNUMPY_SRC_DIR=${Slicer_BINARY_DIR}/NUMPY
+    #-P ${CMAKE_CURRENT_LIST_DIR}/${proj}_patch.cmake
   DEPENDS
     ${NUMPY_DEPENDENCIES}
   )
