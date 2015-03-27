@@ -303,6 +303,15 @@ Slicer_Remote_Add(LandmarkRegistration
   )
 list_conditional_append(Slicer_BUILD_LandmarkRegistration Slicer_REMOTE_DEPENDENCIES LandmarkRegistration)
 
+Slicer_Remote_Add(Sequences
+  GIT_REPOSITORY "${git_protocol}://github.com/SlicerRt/Sequences"
+  GIT_TAG "c7cce53fd996b4a951099ff791da1d7c56627da3"
+  OPTION_NAME Slicer_BUILD_Sequences
+  OPTION_DEPENDS "Slicer_BUILD_QTLOADABLEMODULES"
+  LABELS REMOTE_MODULE
+  )
+list_conditional_append(Slicer_BUILD_Sequences Slicer_REMOTE_DEPENDENCIES Sequences)
+
 #-----------------------------------------------------------------------------
 # Define list of additional options used to configure Slicer
 #------------------------------------------------------------------------------
