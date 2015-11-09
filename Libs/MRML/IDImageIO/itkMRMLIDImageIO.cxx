@@ -819,8 +819,12 @@ MRMLIDImageIO
 
     for (unsigned int j=0; j < 3; ++j)
       {
-//      gradient[j] = g[j] * dw->GetBValue(i) / maxBValue;
-        gradient[j] = g[j];
+      if (maxBValue > 0)
+        {
+          gradient[j] = g[j] * dw->GetBValue(i) / maxBValue;
+        } else {
+          gradient[j] = g[j];
+        }
       }
 
     // format the key so gradients appear in dictionary in sorted order
@@ -920,7 +924,7 @@ MRMLIDImageIO
       gradientSS >> gradient[0];
       gradientSS >> gradient[1];
       gradientSS >> gradient[2];
-/*
+
       // gradient length is the b-value / max_b-value
       double sum = 0.0;
       for (unsigned int i=0; i < 3; ++i)
@@ -933,9 +937,8 @@ MRMLIDImageIO
       if (sum > 0)
         for (unsigned int i=0; i < 3; ++i)
           {
-            gradient[i] /= sum;
+          gradient[i] /= sum;
           }
-*/
       gradients.push_back(gradient);
       }
     }
