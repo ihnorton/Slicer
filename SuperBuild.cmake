@@ -308,7 +308,7 @@ Slicer_Remote_Add(SlicerDMRI
   GIT_REPOSITORY "${git_protocol}://github.com/SlicerDMRI/SlicerDMRI"
   # SlicerDMRI Maintainer: If new revision of the extension add or remove modules, consider updating
   #                        the module lists below. Thanks.
-  GIT_TAG "a82fde4870cbf03d8e418b01464cc23d5891d98f"
+  GIT_TAG "3cc73b527c44951f4d0e45b9f6ad0a438307c2df"
   OPTION_NAME Slicer_BUILD_SlicerDMRI
   OPTION_DEPENDS "Slicer_BUILD_DIFFUSION_SUPPORT"
   LABELS REMOTE_EXTENSION
