@@ -134,18 +134,18 @@ bool qSlicerCoreCommandOptions::ignoreSlicerRC()const
 }
 
 //-----------------------------------------------------------------------------
-QStringList qSlicerCoreCommandOptions::additonalModulePaths()const
+QStringList qSlicerCoreCommandOptions::additionalModulePaths()const
 {
   Q_D(const qSlicerCoreCommandOptions);
-  QStringList allAdditonalModulePaths;
+  QStringList allAdditionalModulePaths;
 
-  QString additonalModulePath = d->ParsedArgs.value("additional-module-path").toString();
-  if (!additonalModulePath.isEmpty())
+  QString additionalModulePath = d->ParsedArgs.value("additional-module-path").toString();
+  if (!additionalModulePath.isEmpty())
     {
-    allAdditonalModulePaths << additonalModulePath;
+    allAdditionalModulePaths << additionalModulePath;
     }
-  allAdditonalModulePaths.append(d->ParsedArgs.value("additional-module-paths").toStringList());
-  return allAdditonalModulePaths;
+  allAdditionalModulePaths.append(d->ParsedArgs.value("additional-module-paths").toStringList());
+  return allAdditionalModulePaths;
 }
 
 //-----------------------------------------------------------------------------
