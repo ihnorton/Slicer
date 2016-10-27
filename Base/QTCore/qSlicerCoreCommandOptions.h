@@ -98,6 +98,9 @@ public:
   /// Return list of additional module path that should be considered when searching for modules to load.
   QStringList additionalModulePaths()const;
 
+  /// Return path given with `--launcher-additional-settings`
+  QString launcherAdditionalSettingsPath()const;
+
   /// Return list of modules that should not be loaded.
   QStringList modulesToIgnore()const;
 

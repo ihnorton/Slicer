@@ -20,6 +20,7 @@
 
 // Qt includes
 #include <QDebug>
+#include <QSettings>
 
 // CTK includes
 #include <ctkPimpl.h>
@@ -134,6 +135,14 @@ bool qSlicerCoreCommandOptions::ignoreSlicerRC()const
 }
 
 //-----------------------------------------------------------------------------
+QStringList qSlicerCoreCommonOptions::launcherAdditionalSettingsPath()const
+{
+  Q_D(const qSlicerCoreCommandOptions);
+
+  return d->ParsedArgs.value("launcher-additional-settings").toString();
+}
+
+//-----------------------------------------------------------------------------
 QStringList qSlicerCoreCommandOptions::additionalModulePaths()const
 {
   Q_D(const qSlicerCoreCommandOptions);
@@ -145,6 +154,7 @@ QStringList qSlicerCoreCommandOptions::additionalModulePaths()const
     allAdditionalModulePaths << additionalModulePath;
     }
   allAdditionalModulePaths.append(d->ParsedArgs.value("additional-module-paths").toStringList());
+
   return allAdditionalModulePaths;
 }
 
@@ -399,6 +409,9 @@ void qSlicerCoreCommandOptions::addArguments()
 
   this->addArgument("additional-module-paths", "", QVariant::StringList,
                     "List of additional module path to consider when searching for modules to load.");
+
+  this->addArgument("launcher-additional-settings", "", QVariant::String,
+                    "Settings file to consider");
 
   this->addArgument("modules-to-ignore", "", QVariant::String,
                     "Comma separated list of modules that should *NOT* be loaded.");

@@ -106,7 +106,7 @@ int SlicerAppMain(int argc, char* argv[])
 #endif
 
 
-  // Allow a custom appliction name so that the settings
+  // Allow a custom application name so that the settings
   // can be distinct for differently named applications
   QString applicationName("Slicer");
   if (argv[0])

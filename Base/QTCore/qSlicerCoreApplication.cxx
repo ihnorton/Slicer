@@ -1031,6 +1031,26 @@ QSettings* qSlicerCoreApplication::revisionUserSettings()const
 }
 
 //-----------------------------------------------------------------------------
+QSettings* qSlicerCoreApplication::launcherAdditionalSettings()const
+{
+  Q_D(const qSlicerCoreApplication);
+  qSlicerCoreApplicationPrivate* mutable_d =
+    const_cast<qSlicerCoreApplicationPrivate*>(d);
+  // If required, instantiate Settings
+  if(!mutable_d->RevisionUserSettings)
+    {
+    QString launcherSettingsPath = this->coreCommandOptions()->launcherAdditionalSettingsPath();
+    mutable_d->RevisionUserSettings =
+        launcherSettings.isEmpty ?
+          new QSettings() :
+          new QSettings(launcherSettingsPath,
+                        QSettings::IniFormat, const_cast<qSlicerCoreApplication*>(this));
+    }
+  return mutable_d->RevisionUserSettings;
+}
+
+
+//-----------------------------------------------------------------------------
 CTK_GET_CPP(qSlicerCoreApplication, QString, intDir, IntDir);
 
 //-----------------------------------------------------------------------------
