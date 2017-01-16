@@ -157,10 +157,24 @@ int vtkMRMLModelStorageNode::ReadDataInternal(vtkMRMLNode *refNode)
       if (reader->IsFilePolyData())
         {
         reader->Update();
+        reader->ReadAllScalarsOn();
+        reader->ReadAllVectorsOn();
+        reader->ReadAllNormalsOn();
+        reader->ReadAllTensorsOn();
+        reader->ReadAllColorScalarsOn();
+        reader->ReadAllTCoordsOn();
+        reader->ReadAllFieldsOn();
         modelNode->SetPolyDataConnection(reader->GetOutputPort());
         }
       else if (unstructuredGridReader->IsFileUnstructuredGrid())
         {
+        unstructuredGridReader->ReadAllScalarsOn();
+        unstructuredGridReader->ReadAllVectorsOn();
+        unstructuredGridReader->ReadAllNormalsOn();
+        unstructuredGridReader->ReadAllTensorsOn();
+        unstructuredGridReader->ReadAllColorScalarsOn();
+        unstructuredGridReader->ReadAllTCoordsOn();
+        unstructuredGridReader->ReadAllFieldsOn();
         unstructuredGridReader->Update();
         modelNode->SetUnstructuredGridConnection(unstructuredGridReader->GetOutputPort());
         }
