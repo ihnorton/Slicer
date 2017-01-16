@@ -34,6 +34,7 @@
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
 #include <vtkTriangleFilter.h>
+#include <vtkUnstructuredGrid.h>
 #include <vtkVersion.h>
 
 //------------------------------------------------------------------------------
@@ -133,10 +134,10 @@ void qMRMLModelInfoWidget::updateWidgetFromMRML()
     // so if the widget is not visible then do not update
     return;
   }
-  vtkPolyData *poly = d->MRMLModelNode ? d->MRMLModelNode->GetPolyData() : 0;
-  if (poly)
+  vtkPointSet *mesh = d->MRMLModelNode ? d->MRMLModelNode->GetMesh() : 0;
+  if (mesh)
     {
-    d->TriangleFilter->SetInputData(poly);
+    d->TriangleFilter->SetInputData(mesh);
     d->TriangleFilter->Update();
     if (d->TriangleFilter->GetOutput()->GetNumberOfCells() > 0)
       {
@@ -149,15 +150,27 @@ void qMRMLModelInfoWidget::updateWidgetFromMRML()
       d->VolumeAreaDoubleSpinBox->setValue(0);
       }
 
-    d->NumberOfPointsSpinBox->setValue(poly->GetNumberOfPoints());
-    d->NumberOfCellsSpinBox->setValue(poly->GetNumberOfCells());
-    d->NumberOfVertsValueLabel->setText(QString::number(poly->GetNumberOfVerts()));
-    d->NumberOfLinesValueLabel->setText(QString::number(poly->GetNumberOfLines()));
-    d->NumberOfPolysValueLabel->setText(QString::number(poly->GetNumberOfPolys()));
-    d->NumberOfStripsValueLabel->setText(QString::number(poly->GetNumberOfStrips()));
-    d->MaxCellSizeValueLabel->setText(QString::number(poly->GetMaxCellSize()));
-    d->NumberOfPointsScalarsSpinBox->setValue(poly->GetPointData()->GetNumberOfComponents());
-    d->NumberOfCellsScalarsSpinBox->setValue(poly->GetCellData()->GetNumberOfComponents());
+    d->NumberOfPointsSpinBox->setValue(mesh->GetNumberOfPoints());
+    d->NumberOfCellsSpinBox->setValue(mesh->GetNumberOfCells());
+    if (vtkUnstructuredGrid::SafeDownCast(mesh))
+      {
+      d->MeshTypeLineEdit->setText("Volumetric Mesh (vtkUnstructuredGrid)");
+      d->NumberOfVertsValueLabel->setText("0");
+      d->NumberOfLinesValueLabel->setText("0");
+      d->NumberOfPolysValueLabel->setText("0");
+      d->NumberOfStripsValueLabel->setText("0");
+      }
+    else if (vtkPolyData* poly = vtkPolyData::SafeDownCast(mesh))
+      {
+      d->MeshTypeLineEdit->setText("Surface Mesh (vtkPolyData)");
+      d->NumberOfVertsValueLabel->setText(QString::number(poly->GetNumberOfVerts()));
+      d->NumberOfLinesValueLabel->setText(QString::number(poly->GetNumberOfLines()));
+      d->NumberOfPolysValueLabel->setText(QString::number(poly->GetNumberOfPolys()));
+      d->NumberOfStripsValueLabel->setText(QString::number(poly->GetNumberOfStrips()));
+      }
+    d->MaxCellSizeValueLabel->setText(QString::number(mesh->GetMaxCellSize()));
+    d->NumberOfPointsScalarsSpinBox->setValue(mesh->GetPointData()->GetNumberOfComponents());
+    d->NumberOfCellsScalarsSpinBox->setValue(mesh->GetCellData()->GetNumberOfComponents());
     }
   else
     {
