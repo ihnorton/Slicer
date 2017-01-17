@@ -156,10 +156,10 @@ int vtkMRMLSceneImportIDConflictTest(int vtkNotUsed(argc), char * vtkNotUsed(arg
   // check that the model nodes and model display nodes point to the right poly data
 
   CHECK_NULL(modelNode2->GetPolyData()); // new model node should have null polydata
-  CHECK_NULL(modelDisplayNode2->GetInputPolyData()); // new model node's display node should have null polydata
+  CHECK_NULL(modelDisplayNode2->GetInputMesh()); // new model node's display node should have null polydata
   CHECK_NOT_NULL(modelNode->GetPolyData()); // original model node should not have null polydata
-  CHECK_NOT_NULL(modelDisplayNode->GetInputPolyData()); // original model display node should not have null polydata
-  CHECK_POINTER(modelNode->GetPolyData(), modelDisplayNode->GetInputPolyData()); // original model node and display node don't have the same poly data
+  CHECK_NOT_NULL(modelDisplayNode->GetInputMesh()); // original model display node should not have null polydata
+  CHECK_POINTER(modelNode->GetPolyData(), modelDisplayNode->GetInputMesh()); // original model node and display node don't have the same poly data
 
   return EXIT_SUCCESS;
 }

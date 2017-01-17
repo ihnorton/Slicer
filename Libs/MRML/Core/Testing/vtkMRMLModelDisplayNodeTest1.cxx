@@ -70,7 +70,7 @@ int TestSetPolyData(bool observePolyDataBeforeObserveDisplay,
     scene->AddNode(display.GetPointer());
     model->UpdateScene(scene.GetPointer());
     }
-  if (display->GetInputPolyData() != model->GetPolyData())
+  if (display->GetInputMesh() != model->GetPolyData())
     {
     std::cerr << __LINE__ << ": vtkMRMLModelNode::SetAndObservePolyData "
               << "failed when polydata is set "
@@ -81,7 +81,7 @@ int TestSetPolyData(bool observePolyDataBeforeObserveDisplay,
               << " the observation:\n"
               << "PolyData: " << polyData.GetPointer() << ", "
               << "Model: " << model->GetPolyData() << ", "
-              << "Display: " << display->GetInputPolyData() << std::endl;
+              << "Display: " << display->GetInputMesh() << std::endl;
     return EXIT_FAILURE;
     }
   return EXIT_SUCCESS;

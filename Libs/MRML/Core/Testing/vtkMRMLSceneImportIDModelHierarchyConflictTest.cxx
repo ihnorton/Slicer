@@ -69,7 +69,7 @@ int ImportIDModelHierarchyConflictTest()
   CHECK_POINTER(modelNode->GetDisplayNode(), modelDisplayNode.GetPointer());
 
   // does the display node point to the correct polydata?
-  CHECK_POINTER(modelDisplayNode->GetInputPolyData(), modelNode->GetPolyData());
+  CHECK_POINTER(modelDisplayNode->GetInputMesh(), modelNode->GetPolyData());
 
   // add a model hierarchy node
   vtkNew<vtkMRMLModelDisplayNode> hierachyDisplayNode;
@@ -190,10 +190,10 @@ int ImportIDModelHierarchyConflictTest()
 
   // check that the model nodes and model display nodes point to the right poly data
   CHECK_NULL(modelNode2->GetPolyData()); // new model node should have null polydata
-  CHECK_NULL(modelDisplayNode2->GetInputPolyData()); // new model node's display node should have null polydata
+  CHECK_NULL(modelDisplayNode2->GetInputMesh()); // new model node's display node should have null polydata
   CHECK_NOT_NULL(modelNode->GetPolyData()); // original model node should not have null polydata
-  CHECK_NOT_NULL(modelDisplayNode->GetInputPolyData()); // original model display node should not have null polydata
-  CHECK_POINTER(modelNode->GetPolyData(), modelDisplayNode->GetInputPolyData()); // original model node and display node don't have the same poly data
+  CHECK_NOT_NULL(modelDisplayNode->GetInputMesh()); // original model display node should not have null polydata
+  CHECK_POINTER(modelNode->GetPolyData(), modelDisplayNode->GetInputMesh()); // original model node and display node don't have the same poly data
 
   return EXIT_SUCCESS;
 }

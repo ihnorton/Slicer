@@ -292,7 +292,7 @@ def verifyModels():
   nn = getNodes('*ModelNode*')
   for n in nn:
     mpd = nn[n].GetPolyData()
-    mdpd = nn[n].GetDisplayNode().GetInputPolyData()
+    mdpd = nn[n].GetDisplayNode().GetInputMesh()
     if mpd != mdpd:
       print(nn[n].GetName())
       print(mpd,mdpd)
@@ -313,7 +313,7 @@ verifyModels()
       polyDataInScene.append(modelNode.GetPolyData())
       for dn in xrange(modelNode.GetNumberOfDisplayNodes()):
         displayNode = modelNode.GetNthDisplayNode(dn)
-        if modelNode.GetPolyData() != displayNode.GetInputPolyData():
+        if modelNode.GetPolyData() != displayNode.GetInputMesh():
           self.delayDisplay("Model %d does not match its display node %d! (name: %s, ids: %s and %s)" % (n,dn,modelNode.GetName(), modelNode.GetID(),displayNode.GetID()))
           success = False
       for sn in xrange(modelNode.GetNumberOfStorageNodes()):
