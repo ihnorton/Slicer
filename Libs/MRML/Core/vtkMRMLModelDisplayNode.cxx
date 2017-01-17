@@ -24,6 +24,7 @@ Version:   $Revision: 1.3 $
 #include <vtkPassThrough.h>
 #include <vtkPointData.h>
 #include <vtkPointSet.h>
+#include <vtkThreshold.h>
 #include <vtkVersion.h>
 
 //----------------------------------------------------------------------------
@@ -34,6 +35,8 @@ vtkMRMLModelDisplayNode::vtkMRMLModelDisplayNode()
 {
   this->PassThrough = vtkPassThrough::New();
   this->AssignAttribute = vtkAssignAttribute::New();
+  this->ThresholdFilter = vtkThreshold::New();
+  this->ThresholdEnabled = false;
 
   // the default behavior for models is to use the scalar range of the data
   // to reset the display scalar range, so use the Data flag
@@ -48,6 +51,7 @@ vtkMRMLModelDisplayNode::~vtkMRMLModelDisplayNode()
 {
   this->PassThrough->Delete();
   this->AssignAttribute->Delete();
+  this->ThresholdFilter->Delete();
 }
 
 //---------------------------------------------------------------------------
@@ -81,6 +85,7 @@ void vtkMRMLModelDisplayNode
 {
   this->PassThrough->SetInputConnection(meshConnection);
   this->AssignAttribute->SetInputConnection(meshConnection);
+  this->ThresholdFilter->SetInputConnection(this->AssignAttribute->GetOutputPort());
 }
 
 //---------------------------------------------------------------------------
@@ -115,7 +120,14 @@ vtkPointSet* vtkMRMLModelDisplayNode::GetOutputMesh()
 //---------------------------------------------------------------------------
 vtkAlgorithmOutput* vtkMRMLModelDisplayNode::GetOutputMeshConnection()
 {
-  if (this->GetActiveScalarName())
+  if (this->GetActiveScalarName() &&
+      this->GetScalarVisibility() &&
+      this->ThresholdEnabled)
+    {
+    return this->ThresholdFilter->GetOutputPort();
+    }
+  else if (this->GetActiveScalarName() &&
+           this->GetScalarVisibility())
     {
     return this->AssignAttribute->GetOutputPort();
     }
@@ -123,6 +135,42 @@ vtkAlgorithmOutput* vtkMRMLModelDisplayNode::GetOutputMeshConnection()
     {
     return this->PassThrough->GetOutputPort();
     }
+}
+
+//---------------------------------------------------------------------------
+void vtkMRMLModelDisplayNode::SetThresholdRange(double min, double max)
+{
+  vtkMTimeType mtime = this->ThresholdFilter->GetMTime();
+  this->ThresholdFilter->ThresholdBetween(min, max);
+  if (mtime < this->ThresholdFilter->GetMTime())
+    {
+    this->Modified();
+    }
+}
+
+//---------------------------------------------------------------------------
+void vtkMRMLModelDisplayNode::SetThresholdRange(double range[2])
+{
+  this->SetThresholdRange(range[0], range[1]);
+}
+
+//---------------------------------------------------------------------------
+double vtkMRMLModelDisplayNode::GetThresholdMin()
+{
+  return this->ThresholdFilter->GetLowerThreshold();
+}
+
+//---------------------------------------------------------------------------
+double vtkMRMLModelDisplayNode::GetThresholdMax()
+{
+  return this->ThresholdFilter->GetUpperThreshold();
+}
+
+//---------------------------------------------------------------------------
+void vtkMRMLModelDisplayNode::GetThresholdRange(double range[2])
+{
+  range[0] = this->GetThresholdMin();
+  range[1] = this->GetThresholdMax();
 }
 
 //---------------------------------------------------------------------------
@@ -169,7 +217,9 @@ void vtkMRMLModelDisplayNode::UpdateMeshPipeline()
     int flag = this->GetScalarRangeFlag();
     if (flag == vtkMRMLDisplayNode::UseDataScalarRange)
       {
-      this->SetScalarRange(this->GetOutputMesh()->GetScalarRange());
+      this->SetScalarRange(this->GetActiveScalarName() ?
+                           vtkPointSet::SafeDownCast(this->AssignAttribute->GetOutput())->GetScalarRange() :
+                           this->GetInputMesh()->GetScalarRange());
       }
     else if (flag == vtkMRMLDisplayNode::UseColorNodeScalarRange)
       {
