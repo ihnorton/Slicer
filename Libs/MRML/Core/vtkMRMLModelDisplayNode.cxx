@@ -13,13 +13,16 @@ Version:   $Revision: 1.3 $
 =========================================================================auto=*/
 // MRML includes
 #include "vtkMRMLModelDisplayNode.h"
+#include "vtkMRMLColorNode.h"
 
 // VTK includes
 #include <vtkAlgorithmOutput.h>
 #include <vtkAssignAttribute.h>
 #include <vtkCommand.h>
+#include <vtkLookupTable.h>
 #include <vtkObjectFactory.h>
 #include <vtkPassThrough.h>
+#include <vtkPointData.h>
 #include <vtkPointSet.h>
 #include <vtkVersion.h>
 
@@ -162,10 +165,29 @@ void vtkMRMLModelDisplayNode::UpdateMeshPipeline()
   if (this->GetOutputMesh())
     {
     this->GetOutputMeshConnection()->GetProducer()->Update();
-    if (this->GetAutoScalarRange())
+
+    int flag = this->GetScalarRangeFlag();
+    if (flag == vtkMRMLDisplayNode::UseDataScalarRange)
       {
-      vtkDebugMacro("UpdateMeshPipeline: Auto flag is on, resetting scalar range!");
       this->SetScalarRange(this->GetOutputMesh()->GetScalarRange());
+      }
+    else if (flag == vtkMRMLDisplayNode::UseColorNodeScalarRange)
+      {
+      vtkLookupTable* lut = this->GetColorNode() ?
+                            this->GetColorNode()->GetLookupTable() : NULL;
+      if (lut)
+        {
+        this->SetScalarRange(lut->GetRange());
+        }
+      }
+    else if (flag == vtkMRMLDisplayNode::UseDataTypeScalarRange)
+      {
+      vtkPointData* pData = this->GetOutputMesh()->GetPointData();
+      vtkDataArray *dataArray = pData ? pData->GetArray(this->GetActiveScalarName()) : NULL;
+      if (dataArray)
+        {
+        this->SetScalarRange(dataArray->GetDataTypeMin(), dataArray->GetDataTypeMax());
+        }
       }
     }
 }
