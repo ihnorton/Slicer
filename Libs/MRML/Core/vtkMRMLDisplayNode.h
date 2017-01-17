@@ -66,13 +66,17 @@ public:
   /// data, for example minimum integer to maximum integer
   /// UseManualScalarRange - use user defined values
   /// \sa ScalarRangeFlag, GetScalarRangeFlag(), SetScalarRangeFlag(),
-  /// SetScalarRange(), GetScalarRange()
+  /// SetScalarRange(), GetScalarRange(), GetScalarRangeFlagTypeAsString()
   typedef enum {
     UseManualScalarRange = 0,
     UseDataScalarRange,
     UseColorNodeScalarRange,
     UseDataTypeScalarRange,
   } ScalarRangeFlagType;
+
+  /// Convert between scalar range flag type id and string
+  /// \sa ScalarRangeFlag
+  const char* GetScalarRangeFlagTypeAsString(int flag);
 
   /// Returns the first displayable node that is associated to this display node
   /// \sa vtkMRMLDisplayableNode

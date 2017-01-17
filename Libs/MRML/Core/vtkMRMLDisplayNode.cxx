@@ -162,7 +162,7 @@ void vtkMRMLDisplayNode::WriteXML(ostream& of, int nIndent)
 
   of << indent << " interpolateTexture=\"" << (this->InterpolateTexture ? "true" : "false") << "\"";
 
-  of << indent << " scalarRangeFlag=\"" << this->ScalarRangeFlag << "\"";
+  of << indent << " scalarRangeFlag=\"" << this->GetScalarRangeFlagTypeAsString(this->ScalarRangeFlag) << "\"";
 
   of << indent << " scalarRange=\"" << this->ScalarRange[0] << " "
      << this->ScalarRange[1] << "\"";
@@ -979,4 +979,20 @@ void vtkMRMLDisplayNode::AutoScalarRangeOn()
 void vtkMRMLDisplayNode::AutoScalarRangeOff()
 {
   this->SetScalarRangeFlag(vtkMRMLDisplayNode::UseManualScalarRange);
+}
+
+//-------------------------------------------------------
+const char* vtkMRMLDisplayNode
+::GetScalarRangeFlagTypeAsString(int flag)
+{
+  switch (flag)
+    {
+    case UseManualScalarRange: return "UseManual";
+    case UseDataScalarRange: return "UseData";
+    case UseColorNodeScalarRange: return "UseColorNode";
+    case UseDataTypeScalarRange: return "UseDataType";
+    default:
+      // invalid id
+      return "";
+    }
 }
