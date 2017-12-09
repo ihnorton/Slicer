@@ -145,20 +145,17 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-function(gp_append_unique list_var value)
-  set(contains 0)
+macro(gp_append_unique list_var value)
+  set(contains -1)
+  set(_gp_did_append_list false)
 
-  foreach(item ${${list_var}})
-    if("${item}" STREQUAL "${value}")
-      set(contains 1)
-      break()
-    endif()
-  endforeach()
+  list(FIND ${list_var} "${value}" contains)
 
-  if(NOT contains)
-    set(${list_var} ${${list_var}} "${value}" PARENT_SCOPE)
+  if(contains EQUAL -1)
+    set(${list_var} ${${list_var}} "${value}")
+    set(_gp_did_append_list true)
   endif()
-endfunction()
+endmacro()
 
 
 function(is_file_executable file result_var)
@@ -879,9 +876,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     endif()
 
     if(add_item)
-      list(LENGTH ${prerequisites_var} list_length_before_append)
       gp_append_unique(${prerequisites_var} "${item}")
-      list(LENGTH ${prerequisites_var} list_length_after_append)
 
       if(${recurse})
         # If item was really added, this is the first time we have seen it.
@@ -891,7 +886,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
         # But first: resolve its name to an absolute full path name such
         # that the analysis tools can simply accept it as input.
         #
-        if(NOT list_length_before_append EQUAL list_length_after_append)
+        if(_gp_did_append_list)
           gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item)
           set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
         endif()
