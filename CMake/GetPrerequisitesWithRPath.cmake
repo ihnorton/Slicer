@@ -146,17 +146,13 @@
 #  License text for the above reference.)
 
 function(gp_append_unique list_var value)
-  set(contains 0)
+  if(NOT ${list_var} MATCHES "^(${value});|;(${value});|;(${value})$")
 
-  foreach(item ${${list_var}})
-    if("${item}" STREQUAL "${value}")
-      set(contains 1)
-      break()
-    endif()
-  endforeach()
-
-  if(NOT contains)
     set(${list_var} ${${list_var}} "${value}" PARENT_SCOPE)
+
+    if(DEFINED ${ARGN})
+      set(${ARGN} TRUE PARENT_SCOPE)
+    endif()
   endif()
 endfunction()
 
@@ -648,274 +644,282 @@ endfunction()
 
 
 function(get_prerequisites target prerequisites_var exclude_system recurse exepath dirs)
-  set(verbose 0)
-  set(eol_char "E")
+  get_property(_cached_prereq SOURCE __g_prereqs PROPERTY ${target})
+  if(NOT DEFINED _cached_prereq)
+    set(verbose 0)
+    set(eol_char "E")
 
-  if(NOT IS_ABSOLUTE "${target}")
-    message("warning: target '${target}' is not absolute...")
-  endif()
-
-  if(NOT EXISTS "${target}")
-    message("warning: target '${target}' does not exist...")
-  endif()
-
-  set(gp_cmd_paths ${gp_cmd_paths}
-    "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
-    "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
-    "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
-    "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/BIN"
-    "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
-    "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
-    "/usr/local/bin"
-    "/usr/bin"
-    )
-
-  # <setup-gp_tool-vars>
-  #
-  # Try to choose the right tool by default. Caller can set gp_tool prior to
-  # calling this function to force using a different tool.
-  #
-  if("${gp_tool}" STREQUAL "")
-    set(gp_tool "ldd")
-
-    if(APPLE)
-      set(gp_tool "otool")
+    if(NOT IS_ABSOLUTE "${target}")
+      message("warning: target '${target}' is not absolute...")
     endif()
 
-    if(WIN32 AND NOT UNIX) # This is how to check for cygwin, har!
-      find_program(gp_dumpbin "dumpbin" PATHS ${gp_cmd_paths})
-      if(gp_dumpbin)
-        set(gp_tool "dumpbin")
-      else() # Try harder. Maybe we're on MinGW
-        set(gp_tool "objdump")
-      endif()
+    if(NOT EXISTS "${target}")
+      message("warning: target '${target}' does not exist...")
     endif()
-  endif()
 
-  find_program(gp_cmd ${gp_tool} PATHS ${gp_cmd_paths})
-
-  if(NOT gp_cmd)
-    message(STATUS "warning: could not find '${gp_tool}' - cannot analyze prerequisites...")
-    return()
-  endif()
-
-  set(gp_tool_known 0)
-
-  if("${gp_tool}" STREQUAL "ldd")
-    set(gp_cmd_args "")
-    set(gp_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
-    set(gp_regex_error "not found${eol_char}$")
-    set(gp_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
-    set(gp_regex_cmp_count 1)
-    set(gp_tool_known 1)
-  endif()
-
-  if("${gp_tool}" STREQUAL "otool")
-    set(gp_cmd_args "-L")
-    set(gp_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
-    set(gp_regex_error "")
-    set(gp_regex_fallback "")
-    set(gp_regex_cmp_count 3)
-    set(gp_tool_known 1)
-  endif()
-
-  if("${gp_tool}" STREQUAL "dumpbin")
-    set(gp_cmd_args "/dependents")
-    set(gp_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
-    set(gp_regex_error "")
-    set(gp_regex_fallback "")
-    set(gp_regex_cmp_count 1)
-    set(gp_tool_known 1)
-    set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
-  endif()
-
-  if("${gp_tool}" STREQUAL "objdump")
-    set(gp_cmd_args "-p")
-    set(gp_regex "^\t*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
-    set(gp_regex_error "")
-    set(gp_regex_fallback "")
-    set(gp_regex_cmp_count 1)
-    set(gp_tool_known 1)
-  endif()
-
-  if(NOT gp_tool_known)
-    message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
-    message(STATUS "CMake function get_prerequisites needs more code to handle '${gp_tool}'")
-    message(STATUS "Valid gp_tool values are dumpbin, ldd, objdump and otool.")
-    return()
-  endif()
-
-
-  if("${gp_tool}" STREQUAL "dumpbin")
-    # When running dumpbin, it also needs the "Common7/IDE" directory in the
-    # PATH. It will already be in the PATH if being run from a Visual Studio
-    # command prompt. Add it to the PATH here in case we are running from a
-    # different command prompt.
-    #
-    get_filename_component(gp_cmd_dir "${gp_cmd}" PATH)
-    get_filename_component(gp_cmd_dlls_dir "${gp_cmd_dir}/../../Common7/IDE" ABSOLUTE)
-    # Use cmake paths as a user may have a PATH element ending with a backslash.
-    # This will escape the list delimiter and create havoc!
-    if(EXISTS "${gp_cmd_dlls_dir}")
-      # only add to the path if it is not already in the path
-      set(gp_found_cmd_dlls_dir 0)
-      file(TO_CMAKE_PATH "$ENV{PATH}" env_path)
-      foreach(gp_env_path_element ${env_path})
-        if("${gp_env_path_element}" STREQUAL "${gp_cmd_dlls_dir}")
-          set(gp_found_cmd_dlls_dir 1)
-        endif()
-      endforeach()
-
-      if(NOT gp_found_cmd_dlls_dir)
-        file(TO_NATIVE_PATH "${gp_cmd_dlls_dir}" gp_cmd_dlls_dir)
-        set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
-      endif()
-    endif()
-  endif()
-  #
-  # </setup-gp_tool-vars>
-
-  if("${gp_tool}" STREQUAL "ldd")
-    set(old_ld_env "$ENV{LD_LIBRARY_PATH}")
-    foreach(dir ${exepath} ${dirs})
-      set(ENV{LD_LIBRARY_PATH} "${dir}:$ENV{LD_LIBRARY_PATH}")
-    endforeach()
-  endif()
-
-
-  # Track new prerequisites at each new level of recursion. Start with an
-  # empty list at each level:
-  #
-  set(unseen_prereqs)
-
-  # Run gp_cmd on the target:
-  #
-  execute_process(
-    COMMAND ${gp_cmd} ${gp_cmd_args} ${target}
-    OUTPUT_VARIABLE gp_cmd_ov
-    )
-
-  if("${gp_tool}" STREQUAL "ldd")
-    set(ENV{LD_LIBRARY_PATH} "${old_ld_env}")
-  endif()
-
-  if(verbose)
-    message(STATUS "<RawOutput cmd='${gp_cmd} ${gp_cmd_args} ${target}'>")
-    message(STATUS "gp_cmd_ov='${gp_cmd_ov}'")
-    message(STATUS "</RawOutput>")
-  endif()
-
-  get_filename_component(target_dir "${target}" PATH)
-
-  # Convert to a list of lines:
-  #
-  string(REGEX REPLACE ";" "\\\\;" candidates "${gp_cmd_ov}")
-  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
-
-  # check for install id and remove it from list, since otool -L can include a
-  # reference to itself
-  set(gp_install_id)
-  if("${gp_tool}" STREQUAL "otool")
-    execute_process(
-      COMMAND otool -D ${target}
-      OUTPUT_VARIABLE gp_install_id_ov
+    set(gp_cmd_paths ${gp_cmd_paths}
+      "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
+      "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
+      "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
+      "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/BIN"
+      "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
+      "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
+      "/usr/local/bin"
+      "/usr/bin"
       )
-    # second line is install name
-    string(REGEX REPLACE ".*:\n" "" gp_install_id "${gp_install_id_ov}")
-    if(gp_install_id)
-      # trim
-      string(REGEX MATCH "[^\n ].*[^\n ]" gp_install_id "${gp_install_id}")
-      #message("INSTALL ID is \"${gp_install_id}\"")
-    endif()
-  endif()
 
-  # Analyze each line for file names that match the regular expression:
-  #
-  foreach(candidate ${candidates})
-  if("${candidate}" MATCHES "${gp_regex}")
-
-    # Extract information from each candidate:
-    if(gp_regex_error AND "${candidate}" MATCHES "${gp_regex_error}")
-      string(REGEX REPLACE "${gp_regex_fallback}" "\\1" raw_item "${candidate}")
-    else()
-      string(REGEX REPLACE "${gp_regex}" "\\1" raw_item "${candidate}")
-    endif()
-
-    if(gp_regex_cmp_count GREATER 1)
-      string(REGEX REPLACE "${gp_regex}" "\\2" raw_compat_version "${candidate}")
-      string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\1" compat_major_version "${raw_compat_version}")
-      string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\2" compat_minor_version "${raw_compat_version}")
-      string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\3" compat_patch_version "${raw_compat_version}")
-    endif()
-
-    if(gp_regex_cmp_count GREATER 2)
-      string(REGEX REPLACE "${gp_regex}" "\\3" raw_current_version "${candidate}")
-      string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\1" current_major_version "${raw_current_version}")
-      string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\2" current_minor_version "${raw_current_version}")
-      string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\3" current_patch_version "${raw_current_version}")
-    endif()
-
-    # Use the raw_item as the list entries returned by this function. Use the
-    # gp_resolve_item function to resolve it to an actual full path file if
-    # necessary.
+    # <setup-gp_tool-vars>
     #
-    set(item "${raw_item}")
-
-    # Add each item unless it is excluded:
+    # Try to choose the right tool by default. Caller can set gp_tool prior to
+    # calling this function to force using a different tool.
     #
-    set(add_item 1)
+    if("${gp_tool}" STREQUAL "")
+      set(gp_tool "ldd")
 
-    if("${item}" STREQUAL "${gp_install_id}")
-      set(add_item 0)
+      if(APPLE)
+        set(gp_tool "otool")
+      endif()
+
+      if(WIN32 AND NOT UNIX) # This is how to check for cygwin, har!
+        find_program(gp_dumpbin "dumpbin" PATHS ${gp_cmd_paths})
+        if(gp_dumpbin)
+          set(gp_tool "dumpbin")
+        else() # Try harder. Maybe we're on MinGW
+          set(gp_tool "objdump")
+        endif()
+      endif()
     endif()
 
-    if(add_item AND ${exclude_system})
-      set(type "")
-      gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type)
+    find_program(gp_cmd ${gp_tool} PATHS ${gp_cmd_paths})
 
-      if("${type}" STREQUAL "system")
+    if(NOT gp_cmd)
+      message(STATUS "warning: could not find '${gp_tool}' - cannot analyze prerequisites...")
+      return()
+    endif()
+
+    set(gp_tool_known 0)
+
+    if("${gp_tool}" STREQUAL "ldd")
+      set(gp_cmd_args "")
+      set(gp_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
+      set(gp_regex_error "not found${eol_char}$")
+      set(gp_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
+      set(gp_regex_cmp_count 1)
+      set(gp_tool_known 1)
+    endif()
+
+    if("${gp_tool}" STREQUAL "otool")
+      set(gp_cmd_args "-L")
+      set(gp_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
+      set(gp_regex_error "")
+      set(gp_regex_fallback "")
+      set(gp_regex_cmp_count 3)
+      set(gp_tool_known 1)
+    endif()
+
+    if("${gp_tool}" STREQUAL "dumpbin")
+      set(gp_cmd_args "/dependents")
+      set(gp_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
+      set(gp_regex_error "")
+      set(gp_regex_fallback "")
+      set(gp_regex_cmp_count 1)
+      set(gp_tool_known 1)
+      set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
+    endif()
+
+    if("${gp_tool}" STREQUAL "objdump")
+      set(gp_cmd_args "-p")
+      set(gp_regex "^\t*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
+      set(gp_regex_error "")
+      set(gp_regex_fallback "")
+      set(gp_regex_cmp_count 1)
+      set(gp_tool_known 1)
+    endif()
+
+    if(NOT gp_tool_known)
+      message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
+      message(STATUS "CMake function get_prerequisites needs more code to handle '${gp_tool}'")
+      message(STATUS "Valid gp_tool values are dumpbin, ldd, objdump and otool.")
+      return()
+    endif()
+
+
+    if("${gp_tool}" STREQUAL "dumpbin")
+      # When running dumpbin, it also needs the "Common7/IDE" directory in the
+      # PATH. It will already be in the PATH if being run from a Visual Studio
+      # command prompt. Add it to the PATH here in case we are running from a
+      # different command prompt.
+      #
+      get_filename_component(gp_cmd_dir "${gp_cmd}" PATH)
+      get_filename_component(gp_cmd_dlls_dir "${gp_cmd_dir}/../../Common7/IDE" ABSOLUTE)
+      # Use cmake paths as a user may have a PATH element ending with a backslash.
+      # This will escape the list delimiter and create havoc!
+      if(EXISTS "${gp_cmd_dlls_dir}")
+        # only add to the path if it is not already in the path
+        set(gp_found_cmd_dlls_dir 0)
+        file(TO_CMAKE_PATH "$ENV{PATH}" env_path)
+        foreach(gp_env_path_element ${env_path})
+          if("${gp_env_path_element}" STREQUAL "${gp_cmd_dlls_dir}")
+            set(gp_found_cmd_dlls_dir 1)
+          endif()
+        endforeach()
+
+        if(NOT gp_found_cmd_dlls_dir)
+          file(TO_NATIVE_PATH "${gp_cmd_dlls_dir}" gp_cmd_dlls_dir)
+          set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
+        endif()
+      endif()
+    endif()
+    #
+    # </setup-gp_tool-vars>
+
+    if("${gp_tool}" STREQUAL "ldd")
+      set(old_ld_env "$ENV{LD_LIBRARY_PATH}")
+      foreach(dir ${exepath} ${dirs})
+        set(ENV{LD_LIBRARY_PATH} "${dir}:$ENV{LD_LIBRARY_PATH}")
+      endforeach()
+    endif()
+
+
+    # Track new prerequisites at each new level of recursion. Start with an
+    # empty list at each level:
+    #
+    set(unseen_prereqs)
+
+    # Run gp_cmd on the target:
+    #
+    execute_process(
+      COMMAND ${gp_cmd} ${gp_cmd_args} ${target}
+      OUTPUT_VARIABLE gp_cmd_ov
+      )
+
+    if("${gp_tool}" STREQUAL "ldd")
+      set(ENV{LD_LIBRARY_PATH} "${old_ld_env}")
+    endif()
+
+    if(verbose)
+      message(STATUS "<RawOutput cmd='${gp_cmd} ${gp_cmd_args} ${target}'>")
+      message(STATUS "gp_cmd_ov='${gp_cmd_ov}'")
+      message(STATUS "</RawOutput>")
+    endif()
+
+    get_filename_component(target_dir "${target}" PATH)
+
+    # Convert to a list of lines:
+    #
+    string(REGEX REPLACE ";" "\\\\;" candidates "${gp_cmd_ov}")
+    string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
+
+    # check for install id and remove it from list, since otool -L can include a
+    # reference to itself
+    set(gp_install_id)
+    if("${gp_tool}" STREQUAL "otool")
+      execute_process(
+        COMMAND otool -D ${target}
+        OUTPUT_VARIABLE gp_install_id_ov
+        )
+      # second line is install name
+      string(REGEX REPLACE ".*:\n" "" gp_install_id "${gp_install_id_ov}")
+      if(gp_install_id)
+        # trim
+        string(REGEX MATCH "[^\n ].*[^\n ]" gp_install_id "${gp_install_id}")
+        #message("INSTALL ID is \"${gp_install_id}\"")
+      endif()
+    endif()
+
+    # Analyze each line for file names that match the regular expression:
+    #
+    foreach(candidate ${candidates})
+    if("${candidate}" MATCHES "${gp_regex}")
+
+      # Extract information from each candidate:
+      if(gp_regex_error AND "${candidate}" MATCHES "${gp_regex_error}")
+        string(REGEX REPLACE "${gp_regex_fallback}" "\\1" raw_item "${candidate}")
+      else()
+        string(REGEX REPLACE "${gp_regex}" "\\1" raw_item "${candidate}")
+      endif()
+
+      if(gp_regex_cmp_count GREATER 1)
+        string(REGEX REPLACE "${gp_regex}" "\\2" raw_compat_version "${candidate}")
+        string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\1" compat_major_version "${raw_compat_version}")
+        string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\2" compat_minor_version "${raw_compat_version}")
+        string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\3" compat_patch_version "${raw_compat_version}")
+      endif()
+
+      if(gp_regex_cmp_count GREATER 2)
+        string(REGEX REPLACE "${gp_regex}" "\\3" raw_current_version "${candidate}")
+        string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\1" current_major_version "${raw_current_version}")
+        string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\2" current_minor_version "${raw_current_version}")
+        string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\3" current_patch_version "${raw_current_version}")
+      endif()
+
+      # Use the raw_item as the list entries returned by this function. Use the
+      # gp_resolve_item function to resolve it to an actual full path file if
+      # necessary.
+      #
+      set(item "${raw_item}")
+
+      # Add each item unless it is excluded:
+      #
+      set(add_item 1)
+
+      if("${item}" STREQUAL "${gp_install_id}")
         set(add_item 0)
       endif()
-    endif()
 
-    if(add_item)
-      list(LENGTH ${prerequisites_var} list_length_before_append)
-      gp_append_unique(${prerequisites_var} "${item}")
-      list(LENGTH ${prerequisites_var} list_length_after_append)
+      if(add_item AND ${exclude_system})
+        set(type "")
+        gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type)
 
-      if(${recurse})
-        # If item was really added, this is the first time we have seen it.
-        # Add it to unseen_prereqs so that we can recursively add *its*
-        # prerequisites...
-        #
-        # But first: resolve its name to an absolute full path name such
-        # that the analysis tools can simply accept it as input.
-        #
-        if(NOT list_length_before_append EQUAL list_length_after_append)
-          gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item)
-          set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
+        if("${type}" STREQUAL "system")
+          set(add_item 0)
         endif()
       endif()
-    endif()
-  else()
-    if(verbose)
-      message(STATUS "ignoring non-matching line: '${candidate}'")
-    endif()
-  endif()
-  endforeach()
 
-  list(LENGTH ${prerequisites_var} prerequisites_var_length)
-  if(prerequisites_var_length GREATER 0)
-    list(SORT ${prerequisites_var})
-  endif()
-  if(${recurse})
-    set(more_inputs ${unseen_prereqs})
-    foreach(input ${more_inputs})
-      get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse} "${exepath}" "${dirs}")
+      if(add_item)
+        set(did_append FALSE)
+        gp_append_unique(${prerequisites_var} "${item}" did_append)
+        list(LENGTH ${prerequisites_var} list_length_after_append)
+
+        if(${recurse})
+          # If item was really added, this is the first time we have seen it.
+          # Add it to unseen_prereqs so that we can recursively add *its*
+          # prerequisites...
+          #
+          # But first: resolve its name to an absolute full path name such
+          # that the analysis tools can simply accept it as input.
+          #
+          if(did_append)
+            gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item)
+            set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
+          endif()
+        endif()
+      endif()
+    else()
+      if(verbose)
+        message(STATUS "ignoring non-matching line: '${candidate}'")
+      endif()
+    endif()
     endforeach()
-  endif()
 
-  set(${prerequisites_var} ${${prerequisites_var}} PARENT_SCOPE)
+    list(LENGTH ${prerequisites_var} prerequisites_var_length)
+    if(prerequisites_var_length GREATER 0)
+      list(SORT ${prerequisites_var})
+    endif()
+    if(${recurse})
+      set(more_inputs ${unseen_prereqs})
+      foreach(input ${more_inputs})
+        get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse} "${exepath}" "${dirs}")
+      endforeach()
+    endif()
+
+    # Cache the result
+    set_property(SOURCE __g_prereqs PROPERTY ${target} ${${prerequisites_var}})
+    set(${prerequisites_var} ${${prerequisites_var}} PARENT_SCOPE)
+  else()
+    # We already cached this value
+    set(${prerequisites_var} ${_cached_prereq} PARENT_SCOPE)
+  endif()
 endfunction()
 
 

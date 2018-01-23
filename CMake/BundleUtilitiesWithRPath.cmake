@@ -450,11 +450,10 @@ function(set_bundle_key_values keys_var context item exepath dirs copyflag)
 
   get_item_key("${item}" key)
 
-  list(LENGTH ${keys_var} length_before)
-  gp_append_unique(${keys_var} "${key}")
-  list(LENGTH ${keys_var} length_after)
+  set(did_append FALSE)
+  gp_append_unique(${keys_var} "${key}" did_append)
 
-  if(NOT length_before EQUAL length_after)
+  if(did_append)
     gp_resolve_item("${context}" "${item}" "${exepath}" "${dirs}" resolved_item)
 
     gp_item_default_embedded_path("${item}" default_embedded_path)
