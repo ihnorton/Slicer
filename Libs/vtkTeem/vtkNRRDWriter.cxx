@@ -8,6 +8,10 @@
 #include "vtkObjectFactory.h"
 #include "vtkInformation.h"
 #include <vtkVersion.h>
+#include <vnl/vnl_math.h>
+#include <vnl/vnl_double_3.h>
+
+#include "itkNumberToString.h"
 
 class AttributeMapType: public std::map<std::string, std::string> {};
 class AxisInfoMapType : public std::map<unsigned int, std::string> {};
@@ -23,7 +27,7 @@ vtkNRRDWriter::vtkNRRDWriter()
   this->IJKToRASMatrix = vtkMatrix4x4::New();
   this->MeasurementFrameMatrix = vtkMatrix4x4::New();
   this->UseCompression = 1;
-  this->DiffusionWeigthedData = 0;
+  this->DiffusionWeightedData = 0;
   this->FileType = VTK_BINARY;
   this->WriteErrorOff();
   this->Attributes = new AttributeMapType;
@@ -74,7 +78,7 @@ void vtkNRRDWriter::vtkImageDataInfoToNrrdInfo(vtkImageData *in, int &kind, size
 {
 
   vtkDataArray *array;
-  this->DiffusionWeigthedData = 0;
+  this->DiffusionWeightedData = 0;
   if ((array = static_cast<vtkDataArray *> (in->GetPointData()->GetScalars())))
     {
     numComp = array->GetNumberOfComponents();
@@ -101,7 +105,7 @@ void vtkNRRDWriter::vtkImageDataInfoToNrrdInfo(vtkImageData *in, int &kind, size
         if (numGrad == numBValues && numGrad == numComp && numGrad>6)
           {
           kind = nrrdKindList;
-          this->DiffusionWeigthedData = 1;
+          this->DiffusionWeightedData = 1;
           }
         else
           {
@@ -290,8 +294,12 @@ void* vtkNRRDWriter::MakeNRRD()
       }
     }
 
+  // use double-conversion library (via ITK) for more accurate
+  // float64 string representation.
+  itk::NumberToString<double> DoubleConvert;
+
   // 2. Take care about diffusion data
-  if (this->DiffusionWeigthedData)
+  if (this->DiffusionWeightedData)
     {
     unsigned int numGrad = this->DiffusionGradients->GetNumberOfTuples();
     unsigned int numBValues = this->BValues->GetNumberOfTuples();
@@ -299,30 +307,44 @@ void* vtkNRRDWriter::MakeNRRD()
     if (kind[0] == nrrdKindList && numGrad == size[0] && numBValues == size[0])
       {
       // This is diffusion Data
-      double *grad;
-      double bVal,factor;
+      vnl_double_3 grad;
+      double bVal, factor;
       double maxbVal = this->BValues->GetRange()[1];
-      char value[1024];
-      char key[1024];
-      strcpy(key,"modality");
-      strcpy(value,"DWMRI");
-      nrrdKeyValueAdd(nrrd, key, value);
 
-      strcpy(key,"DWMRI_b-value");
-      //sprintf(value,"%f",maxbVal,1024);
-      sprintf(value,"%f",maxbVal);
-      nrrdKeyValueAdd(nrrd,key, value);
-      for (unsigned int ig =0; ig< numGrad; ig++)
+      std::string modality_key("modality");
+      std::string modality_value("DWMRI");
+      nrrdKeyValueAdd(nrrd, modality_key.c_str(), modality_value.c_str());
+
+      std::string bval_key("DWMRI_b-value");
+      std::stringstream bval_value;
+      bval_value << setprecision(17) << maxbVal;
+      nrrdKeyValueAdd(nrrd, bval_key.c_str(), bval_value.str().c_str());
+
+      for (unsigned int ig =0; ig < numGrad; ig++)
         {
-        grad=this->DiffusionGradients->GetTuple3(ig);
+        // key
+        std::stringstream key_stream;
+        key_stream << "DWMRI_gradient_" << setfill('0') << setw(4) << ig;
+
+        // gradient value
+        grad.copy_in(this->DiffusionGradients->GetTuple3(ig));
+
+        // the scale factor must be applied to normalized gradients
+        grad.normalize();
+
         bVal = this->BValues->GetValue(ig);
+
         // for multiple b-values, scale factor is `sqrt(b/b_max)`
-        // per NA-MIC DWI convention. so we take `norm^2 * b_max`
-        // to get back the original b-values.
+        // per NA-MIC DWI convention.
         factor = sqrt(bVal/maxbVal);
-        sprintf(key,"%s%04d","DWMRI_gradient_",ig);
-        sprintf(value,"%f %f %f",grad[0]*factor, grad[1]*factor, grad[2]*factor);
-        nrrdKeyValueAdd(nrrd,key, value);
+
+        std::stringstream value_stream;
+        value_stream << std::setprecision(17) << std::scientific <<
+                        DoubleConvert(grad[0] * factor) << "   " <<
+                        DoubleConvert(grad[1] * factor) << "   " <<
+                        DoubleConvert(grad[2] * factor);
+
+        nrrdKeyValueAdd(nrrd, key_stream.str().c_str(), value_stream.str().c_str());
         }
       }
     }
