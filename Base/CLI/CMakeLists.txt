@@ -16,7 +16,7 @@ find_package(SlicerExecutionModel REQUIRED ModuleDescriptionParser)
 set(${PROJECT_NAME}_ITK_COMPONENTS
   ${ModuleDescriptionParser_ITK_COMPONENTS}
   )
-find_package(ITK 4.6 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+slicer_require_itk_libs(${PROJECT_NAME}_ITK_COMPONENTS)
 
 # --------------------------------------------------------------------------
 # Include dirs
