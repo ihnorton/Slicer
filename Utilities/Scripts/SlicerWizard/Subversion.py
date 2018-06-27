@@ -1,5 +1,6 @@
 """Python API for simple interaction with Subversion."""
 
+from builtins import object
 import os
 import subprocess
 

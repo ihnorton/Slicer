@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import unittest
 import math
@@ -8,7 +12,7 @@ import logging
 # FiducialLayoutSwitchBug1914
 #
 
-class FiducialLayoutSwitchBug1914:
+class FiducialLayoutSwitchBug1914(object):
   def __init__(self, parent):
     parent.title = "FiducialLayoutSwitchBug1914"
     parent.categories = ["Testing.TestCases"]
@@ -39,7 +43,7 @@ class FiducialLayoutSwitchBug1914:
 # qFiducialLayoutSwitchBug1914Widget
 #
 
-class FiducialLayoutSwitchBug1914Widget:
+class FiducialLayoutSwitchBug1914Widget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -145,7 +149,7 @@ class FiducialLayoutSwitchBug1914Widget:
       evalString = 'globals()["%s"].%sTest()' % (moduleName, moduleName)
       tester = eval(evalString)
       tester.runTest()
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       slicer.util.warningDisplay("Reload and Test", 'Exception!\n\n' + str(e) +
@@ -156,7 +160,7 @@ class FiducialLayoutSwitchBug1914Widget:
 # FiducialLayoutSwitchBug1914Logic
 #
 
-class FiducialLayoutSwitchBug1914Logic:
+class FiducialLayoutSwitchBug1914Logic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -275,9 +279,9 @@ class FiducialLayoutSwitchBug1914Logic:
     slicer.util.delayDisplay("Red Slice only",500)
 
     # Switch to conventional layout
-    print 'Calling set layout back to conventional'
+    print('Calling set layout back to conventional')
     lm.setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutConventionalView)
-    print 'Done calling set layout back to conventional'
+    print('Done calling set layout back to conventional')
     slicer.util.delayDisplay("Conventional layout",500)
 
     # Get the current seed widget seed location
@@ -306,7 +310,7 @@ class FiducialLayoutSwitchBug1914Logic:
       rasDiff = math.pow((seedRAS[0] - volumeRAS[0]),2) + math.pow((seedRAS[1] - volumeRAS[1]),2) + math.pow((seedRAS[2] - volumeRAS[2]),2)
       if rasDiff != 0.0:
         rasDiff = math.sqrt(rasDiff)
-      print 'Checking the difference between fiducial RAS position',seedRAS,'and volume RAS as derived from the fiducial display position',volumeRAS,': ',rasDiff
+      print('Checking the difference between fiducial RAS position',seedRAS,'and volume RAS as derived from the fiducial display position',volumeRAS,': ',rasDiff)
       if rasDiff > self.maximumRASDifference:
         slicer.util.delayDisplay("RAS coordinate difference is too large as well!\nExpected < %g but got %g" % (self.maximumRASDifference, rasDiff))
         return False

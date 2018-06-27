@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 import os, subprocess
 import slicer
 import qt
@@ -41,7 +44,7 @@ class DICOMProcess(object):
         self.exeDir = testPath
         break
     if not self.exeDir:
-      raise( UserWarning("Could not find a valid path to DICOM helper applications") )
+      raise UserWarning
 
     self.exeExtension = ""
     if os.name == 'nt':
@@ -61,7 +64,7 @@ class DICOMProcess(object):
     # start the server!
     self.process = qt.QProcess()
     self.process.connect('stateChanged(QProcess::ProcessState)', self.onStateChanged)
-    print ("Starting %s with " % cmd, args)
+    print(("Starting %s with " % cmd, args))
     self.process.start(cmd, args)
 
   def onStateChanged(self, newState):
@@ -99,7 +102,7 @@ class DICOMCommand(DICOMProcess):
   def start(self):
     # run the process!
     self.process = qt.QProcess()
-    print( 'running: ', self.executable, self.args)
+    print(( 'running: ', self.executable, self.args))
     self.process.start(self.executable, self.args)
     self.process.waitForFinished()
     if self.process.exitStatus() == qt.QProcess.CrashExit or self.process.exitCode() != 0:
@@ -110,7 +113,7 @@ class DICOMCommand(DICOMProcess):
       print('error is: %d' % self.process.error())
       print('standard out is: %s' % stdout)
       print('standard error is: %s' % stderr)
-      raise( UserWarning("Could not run %s with %s" % (self.executable, self.args)) )
+      raise UserWarning
     stdout = self.process.readAllStandardOutput()
     return stdout
 
@@ -238,7 +241,7 @@ class DICOMListener(DICOMStoreSCPProcess):
     settings = qt.QSettings()
     databaseDirectory = settings.value('DatabaseDirectory')
     if not databaseDirectory:
-      raise(UserWarning('Database directory not set: cannot start DICOMListener'))
+      raise UserWarning
     if not os.path.exists(databaseDirectory):
       os.mkdir(databaseDirectory)
     incomingDir = databaseDirectory + "/incoming"
@@ -314,7 +317,7 @@ class DICOMSender(DICOMProcess):
       print('error code is: %d' % self.process.error())
       print('standard out is: %s' % stdout)
       print('standard error is: %s' % stderr)
-      raise( UserWarning("Could not send %s to %s:%s" % (file, self.address, self.port)) )
+      raise UserWarning
 
 
 class DICOMTestingQRServer(object):

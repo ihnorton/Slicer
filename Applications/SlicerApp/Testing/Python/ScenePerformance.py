@@ -1,3 +1,10 @@
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +13,7 @@ import vtk, qt, ctk, slicer
 # ScenePerformance
 #
 
-class ScenePerformance:
+class ScenePerformance(object):
   def __init__(self, parent):
     parent.title = "Scene Performance"
     parent.categories = ["Testing.TestCases"]
@@ -35,7 +42,7 @@ class ScenePerformance:
 #
 # ScenePerformanceWidget
 #
-class ScenePerformanceWidget:
+class ScenePerformanceWidget(object):
   def __init__(self, parent = None):
     if parent:
       self.parent = parent
@@ -151,7 +158,7 @@ class ScenePerformanceWidget:
 #
 # ScenePerformanceLogic
 #
-class ScenePerformanceLogic:
+class ScenePerformanceLogic(object):
   def __init__(self):
     pass
 
@@ -170,11 +177,11 @@ class ScenePerformanceLogic:
         (downloadURL, downloadFileName),
         )
 
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     for url,name in downloads:
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
     return filePath
 
   def startTiming(self):
@@ -259,7 +266,7 @@ class ScenePerformanceTest(unittest.TestCase):
       time = logic.stopTiming()
       self.displayPerformance('AddData', file, time)
       averageTime = averageTime + time
-    averageTime = averageTime / self.Repeat
+    averageTime = old_div(averageTime, self.Repeat)
     return self.reportPerformance('AddData', os.path.basename(file), averageTime)
 
   def closeScene(self):
@@ -272,7 +279,7 @@ class ScenePerformanceTest(unittest.TestCase):
       time = logic.stopTiming()
       self.displayPerformance('CloseScene', '', time)
       averageTime = averageTime + time
-    averageTime = averageTime / self.Repeat
+    averageTime = old_div(averageTime, self.Repeat)
     return self.reportPerformance('CloseScene', '', averageTime)
 
   def restoreSceneView(self, sceneViewIndex):
@@ -289,7 +296,7 @@ class ScenePerformanceTest(unittest.TestCase):
       time = logic.stopTiming()
       self.displayPerformance('RestoreSceneView', node.GetID(), time)
       averageTime = averageTime + time
-    averageTime = averageTime / self.Repeat
+    averageTime = old_div(averageTime, self.Repeat)
     return self.reportPerformance('RestoreSceneView', node.GetID(), averageTime)
 
   def setLayout(self, layoutIndex):
@@ -303,7 +310,7 @@ class ScenePerformanceTest(unittest.TestCase):
       time = logic.stopTiming()
       self.displayPerformance('Layout', layoutIndex, time)
       averageTime = averageTime + time
-    averageTime = averageTime / self.Repeat
+    averageTime = old_div(averageTime, self.Repeat)
     return self.reportPerformance('Layout', layoutIndex, averageTime)
 
   def addNodeByID(self, nodeID):
@@ -323,7 +330,7 @@ class ScenePerformanceTest(unittest.TestCase):
       time = logic.stopTiming()
       self.displayPerformance('AddNode', node.GetID(), time)
       averageTime = averageTime + time
-    averageTime = averageTime / self.Repeat
+    averageTime = old_div(averageTime, self.Repeat)
     return self.reportPerformance('AddNode', node.GetID(), averageTime)
 
   def modifyNodeByID(self, nodeID):
@@ -340,5 +347,5 @@ class ScenePerformanceTest(unittest.TestCase):
       time = logic.stopTiming()
       self.displayPerformance('ModifyNode', node.GetID(), time)
       averageTime = averageTime + time
-    averageTime = averageTime / self.Repeat
+    averageTime = old_div(averageTime, self.Repeat)
     return self.reportPerformance('ModifyNode', node.GetID(), averageTime)

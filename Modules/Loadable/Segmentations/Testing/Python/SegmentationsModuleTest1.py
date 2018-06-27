@@ -1,3 +1,7 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -61,7 +65,7 @@ class SegmentationsModuleTest1(unittest.TestCase):
   #------------------------------------------------------------------------------
   def TestSection_RetrieveInputData(self):
     try:
-      import urllib
+      import urllib.request, urllib.parse, urllib.error
       downloads = (
           ('http://slicer.kitware.com/midas3/download/folder/3763/TinyPatient_Seg.zip', self.dataZipFilePath),
           )
@@ -72,7 +76,7 @@ class SegmentationsModuleTest1(unittest.TestCase):
           if downloaded == 0:
             logging.info('Downloading input data to folder\n' + self.dataZipFilePath)
           logging.info('Requesting download from %s...' % (url))
-          urllib.urlretrieve(url, filePath)
+          urllib.request.urlretrieve(url, filePath)
           downloaded += 1
         else:
           logging.info('Input data has been found in folder ' + self.dataZipFilePath)
@@ -90,7 +94,7 @@ class SegmentationsModuleTest1(unittest.TestCase):
       numOfFilesInDataSegDirTest = len([name for name in os.listdir(self.dataSegDir) if os.path.isfile(self.dataSegDir + '/' + name)])
       self.assertEqual( numOfFilesInDataSegDirTest, self.expectedNumOfFilesInDataSegDir )
 
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       logging.error('Test caused exception!\n' + str(e))

@@ -1,12 +1,13 @@
+from __future__ import absolute_import
 import os
 import vtk
 import vtkITK
 import ctk
 import qt
 import slicer
-from EditOptions import HelpButton
-import Effect
-import IslandEffect
+from .EditOptions import HelpButton
+from . import Effect
+from . import IslandEffect
 
 __all__ = [
   'SaveIslandEffectOptions',
@@ -144,7 +145,7 @@ class SaveIslandEffectLogic(IslandEffect.IslandEffectLogic):
     labelLogic = self.sliceLogic.GetLabelLayer()
     xyToIJK = labelLogic.GetXYToIJKTransform()
     ijk = xyToIJK.TransformDoublePoint( xy + (0,) )
-    ijk = map(lambda v: int(round(v)), ijk)
+    ijk = [int(round(v)) for v in ijk]
 
     connectivity = slicer.vtkImageConnectivity()
     connectivity.SetFunctionToSaveIsland()

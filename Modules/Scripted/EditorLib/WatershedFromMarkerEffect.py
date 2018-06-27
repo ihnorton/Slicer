@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import os
 import vtk, qt, ctk, slicer
-from EditOptions import HelpButton
-from EditUtil import EditUtil
-import Effect
-import LabelEffect
+from .EditOptions import HelpButton
+from .EditUtil import EditUtil
+from . import Effect
+from . import LabelEffect
 
 import math
 

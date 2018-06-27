@@ -1,10 +1,15 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
+from past.utils import old_div
 import os
 import slicer
 import vtk
 import qt
 import EditorLib
-from EditUtil import EditUtil
-from EditUtil import UndoRedo
+from .EditUtil import EditUtil
+from .EditUtil import UndoRedo
 from slicer.util import VTKObservationMixin
 
 #########################################################
@@ -162,7 +167,7 @@ class EditBox(VTKObservationMixin):
     for effect in self.effects:
       self.effectIconFiles[effect] = iconDir + effect + '.png'
 
-      if effect in slicer.modules.editorExtensions.keys():
+      if effect in list(slicer.modules.editorExtensions.keys()):
         extensionEffect = slicer.modules.editorExtensions[effect]()
         module = eval('slicer.modules.%s' % effect.lower())
         iconPath = os.path.join( os.path.dirname(module.path),"%s.png" % effect)
@@ -215,7 +220,7 @@ class EditBox(VTKObservationMixin):
         b.objectName = effect + 'ToolButton'
         b.setDefaultAction(a)
         a.setToolTip(effect)
-        if EditBox.displayNames.has_key(effect):
+        if effect in EditBox.displayNames:
           a.setToolTip(EditBox.displayNames[effect])
         hbox.addWidget(b)
 
@@ -295,7 +300,7 @@ class EditBox(VTKObservationMixin):
     self._onParameterNodeModified(EditUtil.getParameterNode())
 
   def setActiveToolLabel(self,name):
-    if EditBox.displayNames.has_key(name):
+    if name in EditBox.displayNames:
       name = EditBox.displayNames[name]
     self.toolsActiveToolName.setText(name)
 
@@ -353,9 +358,9 @@ class EditBox(VTKObservationMixin):
     # look at builtins and extensions
     # - TODO: other effect styles are deprecated
     effectClass = None
-    if effectName in slicer.modules.editorExtensions.keys():
+    if effectName in list(slicer.modules.editorExtensions.keys()):
       effectClass = slicer.modules.editorExtensions[effectName]()
-    elif effectName in self.editorBuiltins.keys():
+    elif effectName in list(self.editorBuiltins.keys()):
       effectClass = self.editorBuiltins[effectName]()
     if effectClass:
       # for effects, create an options gui and an
@@ -368,7 +373,7 @@ class EditBox(VTKObservationMixin):
       self.currentOption.updateGUI()
       layoutManager = slicer.app.layoutManager()
       sliceNodeCount = slicer.mrmlScene.GetNumberOfNodesByClass('vtkMRMLSliceNode')
-      for nodeIndex in xrange(sliceNodeCount):
+      for nodeIndex in range(sliceNodeCount):
         # find the widget for each node in scene
         sliceNode = slicer.mrmlScene.GetNthNodeByClass(nodeIndex, 'vtkMRMLSliceNode')
         sliceWidget = layoutManager.sliceWidget(sliceNode.GetLayoutName())
@@ -382,7 +387,7 @@ class EditBox(VTKObservationMixin):
       try:
         options = eval("%sOptions" % effectName)
         self.currentOption = options(self.optionsFrame)
-      except NameError, AttributeError:
+      except NameError as AttributeError:
         # No options for this effect, skip it
         pass
 
@@ -419,14 +424,14 @@ class EditBox(VTKObservationMixin):
       pad = -9
       height = pad + baseImage.height() + effectImage.height()
       width = height = max(width,height)
-      center = int(width/2)
+      center = int(old_div(width,2))
       cursorImage = qt.QImage(width, height, qt.QImage().Format_ARGB32)
       painter = qt.QPainter()
       cursorImage.fill(0)
       painter.begin(cursorImage)
-      point = qt.QPoint(center - (baseImage.width()/2), 0)
+      point = qt.QPoint(center - (old_div(baseImage.width(),2)), 0)
       painter.drawImage(point, baseImage)
-      point.setX(center - (effectImage.width()/2))
+      point.setX(center - (old_div(effectImage.width(),2)))
       point.setY(cursorImage.height() - effectImage.height())
       painter.drawImage(point, effectImage)
       painter.end()
@@ -447,7 +452,7 @@ class EditBox(VTKObservationMixin):
     cursorPosition = qt.QCursor().pos()
     w = self.mainFrame.width
     h = self.mainFrame.height
-    self.mainFrame.pos = qt.QPoint(cursorPosition.x() - w/2, cursorPosition.y() - h/2)
+    self.mainFrame.pos = qt.QPoint(cursorPosition.x() - old_div(w,2), cursorPosition.y() - old_div(h,2))
     self.mainFrame.show()
     self.mainFrame.raise_()
     Key_Space = 0x20 # not in PythonQt

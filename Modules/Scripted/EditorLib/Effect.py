@@ -1,9 +1,15 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import map
+from builtins import range
+from builtins import object
 import os
 import vtk
 import qt
 import slicer
-from EditOptions import EditOptions
-import EditUtil
+from .EditOptions import EditOptions
+from . import EditUtil
 from slicer.util import NodeModify
 
 __all__ = ['EffectOptions', 'EffectTool', 'EffectLogic', 'Effect']
@@ -328,7 +334,7 @@ class EffectLogic(object):
     imageData = volumeNode.GetImageData()
     if not imageData: return 0
     dims = imageData.GetDimensions()
-    for ele in xrange(3):
+    for ele in range(3):
       if ijk[ele] < 0 or ijk[ele] >= dims[ele]: return 0
     return int(imageData.GetScalarComponentAsDouble(ijk[0], ijk[1], ijk[2], 0))
 
@@ -424,7 +430,7 @@ class EffectLogic(object):
     ijkCorners = []
     for xy in xyCorners:
       ijk = xyToIJK.TransformDoublePoint(xy + (0,))
-      ijkCorners.append(map(round, ijk))
+      ijkCorners.append(list(map(round, ijk)))
 
     if slicePaint:
       slicePaint.SetTopLeft(ijkCorners[0])

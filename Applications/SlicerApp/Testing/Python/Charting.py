@@ -1,3 +1,8 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import os
 import unittest
 import math
@@ -10,7 +15,7 @@ import vtk, qt, ctk, slicer
 # Charting
 #
 
-class Charting:
+class Charting(object):
   def __init__(self, parent):
     parent.title = "Charting" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -41,7 +46,7 @@ class Charting:
 # qChartingWidget
 #
 
-class ChartingWidget:
+class ChartingWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -95,7 +100,7 @@ class ChartingWidget:
     self.helloWorldButton = helloWorldButton
 
   def onHelloWorldButtonClicked(self):
-    print "Hello World !"
+    print("Hello World !")
 
   def onReload(self,moduleName="Charting"):
     """Generic reload method for any scripted module.
@@ -113,7 +118,7 @@ class ChartingWidget:
 # ChartingLogic
 #
 
-class ChartingLogic:
+class ChartingLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -208,19 +213,19 @@ class ChartingTest(unittest.TestCase):
     dn = slicer.mrmlScene.AddNode(slicer.vtkMRMLDoubleArrayNode())
     a = dn.GetArray()
     a.SetNumberOfTuples(600)
-    x = range(0, 600)
+    x = list(range(0, 600))
     for i in range(len(x)):
-      a.SetComponent(i, 0, x[i]/50.0)
-      a.SetComponent(i, 1, math.sin(x[i]/50.0))
+      a.SetComponent(i, 0, old_div(x[i],50.0))
+      a.SetComponent(i, 1, math.sin(old_div(x[i],50.0)))
       a.SetComponent(i, 2, 0)
 
     dn2 = slicer.mrmlScene.AddNode(slicer.vtkMRMLDoubleArrayNode())
     a = dn2.GetArray()
     a.SetNumberOfTuples(600)
-    x = range(0, 600)
+    x = list(range(0, 600))
     for i in range(len(x)):
-      a.SetComponent(i, 0, x[i]/50.0)
-      a.SetComponent(i, 1, math.cos(x[i]/50.0))
+      a.SetComponent(i, 0, old_div(x[i],50.0))
+      a.SetComponent(i, 1, math.cos(old_div(x[i],50.0)))
       a.SetComponent(i, 2, 0)
 
     # Create the ChartNode,
@@ -276,10 +281,10 @@ class ChartingTest(unittest.TestCase):
     dn3 = slicer.mrmlScene.AddNode(slicer.vtkMRMLDoubleArrayNode())
     a = dn3.GetArray()
     a.SetNumberOfTuples(12)
-    x = range(0, 12)
+    x = list(range(0, 12))
     for i in range(len(x)):
-      a.SetComponent(i, 0, x[i]/4.0)
-      a.SetComponent(i, 1, math.sin(x[i]/4.0))
+      a.SetComponent(i, 0, old_div(x[i],4.0))
+      a.SetComponent(i, 1, math.sin(old_div(x[i],4.0)))
       a.SetComponent(i, 2, 0)
 
     # Create another ChartNode
@@ -316,7 +321,7 @@ class ChartingTest(unittest.TestCase):
 
     for i in range(len(times)):
       a.SetComponent(i, 0, times[i])
-      a.SetComponent(i, 1, math.sin(x[i]/4.0) + 4)
+      a.SetComponent(i, 1, math.sin(old_div(x[i],4.0)) + 4)
       a.SetComponent(i, 2, 0)
 
     # Create another ChartNode

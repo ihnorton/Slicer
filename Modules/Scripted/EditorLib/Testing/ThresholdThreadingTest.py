@@ -1,4 +1,6 @@
+from __future__ import print_function
 
+from builtins import object
 import unittest
 import qt
 import slicer
@@ -123,7 +125,7 @@ class ThresholdThreading(unittest.TestCase):
 # ThresholdThreadingTest
 #
 
-class ThresholdThreadingTest:
+class ThresholdThreadingTest(object):
   """
   This class is the 'hook' for slicer to detect and recognize the test
   as a loadable scripted module (with a hidden interface)
@@ -164,7 +166,7 @@ class ThresholdThreadingTest:
 # EditorLibSelfTestWidget
 #
 
-class EditorLibSelfTestWidget:
+class EditorLibSelfTestWidget(object):
   def __init__(self, parent = None):
     self.parent = parent
 

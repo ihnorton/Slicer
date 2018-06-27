@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 import os
 import time
 import unittest
@@ -7,7 +10,7 @@ import vtk, qt, ctk, slicer
 # MarkupsInCompareViewersSelfTest
 #
 
-class MarkupsInCompareViewersSelfTest:
+class MarkupsInCompareViewersSelfTest(object):
   def __init__(self, parent):
     parent.title = "MarkupsInCompareViewersSelfTest"
     parent.categories = ["Testing.TestCases"]
@@ -38,7 +41,7 @@ class MarkupsInCompareViewersSelfTest:
 # qMarkupsInCompareViewersSelfTestWidget
 #
 
-class MarkupsInCompareViewersSelfTestWidget:
+class MarkupsInCompareViewersSelfTestWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -121,7 +124,7 @@ class MarkupsInCompareViewersSelfTestWidget:
       evalString = 'globals()["%s"].%sTest()' % (moduleName, moduleName)
       tester = eval(evalString)
       tester.runTest()
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       slicer.util.warningDisplay('Exception!\n\n' + str(e) + "\n\nSee Python Console for Stack Trace",
@@ -132,7 +135,7 @@ class MarkupsInCompareViewersSelfTestWidget:
 # MarkupsInCompareViewersSelfTestLogic
 #
 
-class MarkupsInCompareViewersSelfTestLogic:
+class MarkupsInCompareViewersSelfTestLogic(object):
 
   def __init__(self):
     pass

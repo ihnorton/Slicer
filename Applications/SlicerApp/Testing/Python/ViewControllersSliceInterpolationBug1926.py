@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +8,7 @@ import vtk, qt, ctk, slicer
 # ViewControllersSliceInterpolationBug1926
 #
 
-class ViewControllersSliceInterpolationBug1926:
+class ViewControllersSliceInterpolationBug1926(object):
   def __init__(self, parent):
     parent.title = "ViewControllers Slice Interpolation Bug 1926" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -37,7 +39,7 @@ class ViewControllersSliceInterpolationBug1926:
 # qViewControllersSliceInterpolationBug1926Widget
 #
 
-class ViewControllersSliceInterpolationBug1926Widget:
+class ViewControllersSliceInterpolationBug1926Widget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -91,7 +93,7 @@ class ViewControllersSliceInterpolationBug1926Widget:
     self.helloWorldButton = helloWorldButton
 
   def onHelloWorldButtonClicked(self):
-    print "Hello World !"
+    print("Hello World !")
 
   def onReload(self,moduleName="ViewControllersSliceInterpolationBug1926"):
     """Generic reload method for any scripted module.
@@ -109,7 +111,7 @@ class ViewControllersSliceInterpolationBug1926Widget:
 # ViewControllersSliceInterpolationBug1926Logic
 #
 
-class ViewControllersSliceInterpolationBug1926Logic:
+class ViewControllersSliceInterpolationBug1926Logic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import

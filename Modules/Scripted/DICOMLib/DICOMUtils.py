@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import os
 import vtk, qt, ctk, slicer
 import logging
@@ -224,7 +226,7 @@ def closeTemporaryDatabase(originalDatabaseDir, cleanup=True):
   return True
 
 #------------------------------------------------------------------------------
-class TemporaryDICOMDatabase:
+class TemporaryDICOMDatabase(object):
   """Context manager to conveniently use temporary DICOM databases
   """
   def __init__(self, directory=None):
@@ -251,7 +253,7 @@ def importDicom(dicomDataDir, dicomDatabase=None):
       dicomDatabase = slicer.dicomDatabase
     indexer.addDirectory( dicomDatabase, dicomDataDir )
     indexer.waitForImportFinished()
-  except Exception, e:
+  except Exception as e:
     import traceback
     traceback.print_exc()
     logging.error('Failed to import DICOM folder ' + dicomDataDir)
@@ -282,19 +284,19 @@ def loadSeriesWithVerification(seriesUIDs, selectedPlugins=None, loadedNodes=Non
   success = True
 
   # Verify loadables if baseline is given
-  if selectedPlugins is not None and len(selectedPlugins.keys()) > 0:
+  if selectedPlugins is not None and len(list(selectedPlugins.keys())) > 0:
     loadablesByPlugin = dicomWidget.detailsPopup.loadablesByPlugin
     actualSelectedPlugins = {}
     for plugin in loadablesByPlugin:
       for loadable in loadablesByPlugin[plugin]:
         if loadable.selected:
-          if actualSelectedPlugins.has_key(plugin.loadType):
+          if plugin.loadType in actualSelectedPlugins:
             count = int(actualSelectedPlugins[plugin.loadType])
             actualSelectedPlugins[plugin.loadType] = count+1
           else:
             actualSelectedPlugins[plugin.loadType] = 1
-    for pluginName in selectedPlugins.keys():
-      if not actualSelectedPlugins.has_key(pluginName):
+    for pluginName in list(selectedPlugins.keys()):
+      if pluginName not in actualSelectedPlugins:
         logging.error("Expected DICOM plugin '%s' was not selected" % (pluginName))
         success = False
       elif actualSelectedPlugins[pluginName] != selectedPlugins[pluginName]:
@@ -305,7 +307,7 @@ def loadSeriesWithVerification(seriesUIDs, selectedPlugins=None, loadedNodes=Non
   # Count relevant node types in scene
   actualLoadedNodes = {}
   if loadedNodes is not None:
-    for nodeType in loadedNodes.keys():
+    for nodeType in list(loadedNodes.keys()):
       nodeCollection = slicer.mrmlScene.GetNodesByClass(nodeType)
       nodeCollection.UnRegister(None)
       actualLoadedNodes[nodeType] = nodeCollection.GetNumberOfItems()
@@ -314,7 +316,7 @@ def loadSeriesWithVerification(seriesUIDs, selectedPlugins=None, loadedNodes=Non
   dicomWidget.detailsPopup.loadCheckedLoadables()
 
   if loadedNodes is not None:
-    for nodeType in loadedNodes.keys():
+    for nodeType in list(loadedNodes.keys()):
       nodeCollection = slicer.mrmlScene.GetNodesByClass(nodeType)
       nodeCollection.UnRegister(None)
       numOfLoadedNodes = nodeCollection.GetNumberOfItems()-actualLoadedNodes[nodeType]
@@ -355,7 +357,7 @@ def seriesUIDsForFiles(files):
   return seriesUIDs
 
 #------------------------------------------------------------------------------
-class LoadDICOMFilesToDatabase:
+class LoadDICOMFilesToDatabase(object):
   """Context manager to conveniently load DICOM files downloaded zipped from the internet
   """
   def __init__( self, url, archiveFilePath=None, dicomDataDir=None, \

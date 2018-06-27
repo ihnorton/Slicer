@@ -1,3 +1,4 @@
+from builtins import map
 __version_info__ = (
   4,
   9,

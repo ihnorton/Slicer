@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -122,7 +125,7 @@ class PlotsSelfTestTest(ScriptedLoadableModuleTest):
     # Fill in the table with some example values
     import math
     numPoints = 69
-    inc = 7.5 / (numPoints - 1)
+    inc = old_div(7.5, (numPoints - 1))
     table.SetNumberOfRows(numPoints)
     for i in range(numPoints):
       table.SetValue(i, 0, i * inc )

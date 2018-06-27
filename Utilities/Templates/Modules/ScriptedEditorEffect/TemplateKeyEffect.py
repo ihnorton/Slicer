@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 import os
 import vtk, qt, ctk, slicer
 import EditorLib
@@ -120,7 +123,7 @@ class TemplateKeyEffectTool(LabelEffect.LabelEffectTool):
       sliceLogic = self.sliceWidget.sliceLogic()
       logic = TemplateKeyEffectLogic(sliceLogic)
       logic.apply(xy)
-      print("Got a %s at %s in %s", (event,str(xy),self.sliceWidget.sliceLogic().GetSliceNode().GetName()))
+      print(("Got a %s at %s in %s", (event,str(xy),self.sliceWidget.sliceLogic().GetSliceNode().GetName())))
       self.abortEvent(event)
     else:
       pass
@@ -185,7 +188,7 @@ pet = EditorLib.TemplateKeyEffectTool(sw)
 # TemplateKeyEffect
 #
 
-class TemplateKeyEffect:
+class TemplateKeyEffect(object):
   """
   This class is the 'hook' for slicer to detect and recognize the extension
   as a loadable scripted module
@@ -224,7 +227,7 @@ class TemplateKeyEffect:
 # TemplateKeyEffectWidget
 #
 
-class TemplateKeyEffectWidget:
+class TemplateKeyEffectWidget(object):
   def __init__(self, parent = None):
     self.parent = parent
 

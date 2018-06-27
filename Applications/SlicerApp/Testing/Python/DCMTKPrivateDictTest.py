@@ -1,3 +1,4 @@
+from builtins import str
 import DICOMLib, sys, slicer, os
 
 dcmfile = sys.argv[1]

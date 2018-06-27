@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import range
 import slicer
 import ctk
 import vtk
@@ -210,7 +212,7 @@ def PushToSlicer(sitkimage, NodeName, compositeView=0, overwrite=False):
         " Use sitkUtils.PushVolumeToSlicer method and slicer.util.setSliceViewerLayers methods instead.",
         FutureWarning)
 
-    if compositeView not in range(3):
+    if compositeView not in list(range(3)):
         raise Exception("Unknown compositeView option given: {0}. Valid values are 0 = background, 1 = foreground', or 2 = label.".format(compositeView))
 
     if compositeView == 2:

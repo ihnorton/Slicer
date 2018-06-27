@@ -1,3 +1,6 @@
+from __future__ import print_function
+from past.builtins import execfile
+from builtins import object
 import logging
 import sys
 
@@ -100,7 +103,7 @@ initLogging(logging.getLogger())
 def getSlicerRCFileName():
   """Return slicer resource script file name '~/.slicerrc.py'"""
   import os
-  if os.environ.has_key('SLICERRC'):
+  if 'SLICERRC' in os.environ:
     rcfile = os.environ['SLICERRC']
   else:
     import os.path
@@ -127,7 +130,7 @@ def loadSlicerRCFile():
 # Internal
 #
 
-class _Internal():
+class _Internal(object):
 
   def __init__( self ):
     import imp

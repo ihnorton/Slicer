@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import os
 import vtk, qt, ctk, slicer
 import logging
@@ -38,7 +42,7 @@ follows the same intensity value back to the starting point within the current s
 
   def deactivate(self):
     # Clear draw pipelines
-    for sliceWidget, pipeline in self.levelTracingPipelines.iteritems():
+    for sliceWidget, pipeline in self.levelTracingPipelines.items():
       self.scriptedEffect.removeActor2D(sliceWidget, pipeline.actor)
     self.levelTracingPipelines = {}
 
@@ -101,7 +105,7 @@ follows the same intensity value back to the starting point within the current s
 #
 # LevelTracingPipeline
 #
-class LevelTracingPipeline:
+class LevelTracingPipeline(object):
   """ Visualization objects and pipeline for each slice view for level tracing
   """
   def __init__(self, effect, sliceWidget):
@@ -119,7 +123,7 @@ class LevelTracingPipeline:
     self.mapper = vtk.vtkPolyDataMapper2D()
     self.actor = vtk.vtkActor2D()
     actorProperty = self.actor.GetProperty()
-    actorProperty.SetColor( 107/255., 190/255., 99/255. )
+    actorProperty.SetColor( old_div(107,255.), old_div(190,255.), old_div(99,255.) )
     actorProperty.SetLineWidth( 1 )
     self.mapper.SetInputData(self.polyData)
     self.actor.SetMapper(self.mapper)
@@ -138,7 +142,7 @@ class LevelTracingPipeline:
     ijk = self.effect.xyToIjk(xy, self.sliceWidget, masterImageData)
     dimensions = masterImageData.GetDimensions()
 
-    for index in xrange(3):
+    for index in range(3):
       # TracingFilter crashes if it receives a seed point at the edge of the image,
       # so only accept the point if it is inside the image and is at least one pixel away from the edge
       if ijk[index] < 1 or ijk[index] >= dimensions[index]-1:

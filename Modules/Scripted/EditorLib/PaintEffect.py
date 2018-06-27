@@ -1,13 +1,21 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 import os
 import vtk
 import ctk
 import qt
 import slicer
-from EditOptions import HelpButton
-from EditUtil import EditUtil
-import LabelEffect
+from .EditOptions import HelpButton
+from .EditUtil import EditUtil
+from . import LabelEffect
 import numpy
 from math import sqrt
+from functools import reduce
 
 __all__ = [
   'PaintEffectOptions',
@@ -237,12 +245,12 @@ class PaintEffectOptions(LabelEffect.LabelEffectOptions):
         spacing = labelVolume.GetSpacing()
         if self.radiusPixelMode == 'diag':
           from math import sqrt
-          diag = sqrt(reduce(lambda x,y:x+y, map(lambda x: x**2, spacing)))
+          diag = sqrt(reduce(lambda x,y:x+y, [x**2 for x in spacing]))
           mmRadius = diag * radius
         elif self.radiusPixelMode == 'min':
           mmRadius = min(spacing) * radius
         else:
-          print (self,"Unknown pixel mode - using 5mm")
+          print((self,"Unknown pixel mode - using 5mm"))
           mmRadius = 5
       else:
         mmRadius = radius
@@ -444,7 +452,7 @@ class PaintEffectTool(LabelEffect.LabelEffectTool):
     polyData.SetLines(lines)
     PI = 3.1415926
     TWOPI = PI * 2
-    PIoverSIXTEEN = PI / 16
+    PIoverSIXTEEN = old_div(PI, 16)
     prevPoint = -1
     firstPoint = -1
     angle = 0
@@ -604,7 +612,7 @@ class PaintEffectTool(LabelEffect.LabelEffectTool):
     tr = [0,0,0]
     bl = [0,0,0]
     br = [0,0,0]
-    for i in xrange(3):
+    for i in range(3):
       tl[i] = int(round(tlIJK[i]))
       if tl[i] < 0:
         tl[i] = 0
@@ -630,7 +638,7 @@ class PaintEffectTool(LabelEffect.LabelEffectTool):
     # to make sure at least one pixel is filled on each click
     maxRowDelta = 0
     maxColumnDelta = 0
-    for i in xrange(3):
+    for i in range(3):
       d = abs(tr[i] - tl[i])
       if d > maxColumnDelta:
         maxColumnDelta = d
@@ -712,10 +720,10 @@ class PaintEffectTool(LabelEffect.LabelEffectTool):
         if distanceSpannedBy100Slices==0:
             zVoxelSize_mm=1
         else:
-            zVoxelSize_mm = distanceSpannedBy100Slices/100
+            zVoxelSize_mm = old_div(distanceSpannedBy100Slices,100)
         # --
         # Compute number of slices spanned by sphere
-        nNumSlicesInEachDirection=brushRadius / zVoxelSize_mm;
+        nNumSlicesInEachDirection=old_div(brushRadius, zVoxelSize_mm);
         nNumSlicesInEachDirection=nNumSlicesInEachDirection-1
         sliceOffsetArray=numpy.concatenate((-1*numpy.arange(1,nNumSlicesInEachDirection+1,),  numpy.arange(1,nNumSlicesInEachDirection+1)))
         for iSliceOffset in sliceOffsetArray:
@@ -739,7 +747,7 @@ class PaintEffectTool(LabelEffect.LabelEffectTool):
             trtemp = [0,0,0]
             bltemp = [0,0,0]
             brtemp = [0,0,0]
-            for i in xrange(3):
+            for i in range(3):
               tltemp[i] = int(round(tlIJKtemp[i]))
               if tltemp[i] < 0:
                 tltemp[i] = 0

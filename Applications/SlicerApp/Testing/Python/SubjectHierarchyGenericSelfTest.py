@@ -1,3 +1,8 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -178,7 +183,7 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
 
       self.assertEqual( len( slicer.util.getNodes('vtkMRMLSubjectHierarchyNode*') ), 1 )
 
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e),self.delayMs*2)
@@ -205,7 +210,7 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
     self.delayDisplay("Add node to subject hierarchy",self.delayMs)
 
     # Get volume previously loaded from DICOM
-    volumeNodes = slicer.util.getNodes('vtkMRMLScalarVolumeNode*').values()
+    volumeNodes = list(slicer.util.getNodes('vtkMRMLScalarVolumeNode*').values())
     ctVolumeNode = volumeNodes[len(volumeNodes)-1]
     self.assertIsNotNone( ctVolumeNode )
 
@@ -414,10 +419,10 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
     sampleLabelmapNode.SetAndObserveImageData(imageData)
 
     extent = imageData.GetExtent()
-    for x in xrange(extent[0], extent[1]+1):
-      for y in xrange(extent[2], extent[3]+1):
-        for z in xrange(extent[4], extent[5]+1):
-          if (x >= (extent[1]/4) and x <= (extent[1]/4) * 3) and (y >= (extent[3]/4) and y <= (extent[3]/4) * 3) and (z >= (extent[5]/4) and z <= (extent[5]/4) * 3):
+    for x in range(extent[0], extent[1]+1):
+      for y in range(extent[2], extent[3]+1):
+        for z in range(extent[4], extent[5]+1):
+          if (x >= (old_div(extent[1],4)) and x <= (old_div(extent[1],4)) * 3) and (y >= (old_div(extent[3],4)) and y <= (old_div(extent[3],4)) * 3) and (z >= (old_div(extent[5],4)) and z <= (old_div(extent[5],4)) * 3):
             imageData.SetScalarComponentFromDouble(x,y,z,0,label)
           else:
             imageData.SetScalarComponentFromDouble(x,y,z,0,0)
@@ -443,10 +448,10 @@ class SubjectHierarchyGenericSelfTestTest(ScriptedLoadableModuleTest):
       self.assertTrue( volumeNode.IsA('vtkMRMLScalarVolumeNode') )
       bounds = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
       volumeNode.GetRASBounds(bounds)
-      x = (bounds[0] + bounds[1])/2
-      y = (bounds[2] + bounds[3])/2
-      z = (bounds[4] + bounds[5])/2
-      radius = min(bounds[1]-bounds[0],bounds[3]-bounds[2],bounds[5]-bounds[4]) / 3.0
+      x = old_div((bounds[0] + bounds[1]),2)
+      y = old_div((bounds[2] + bounds[3]),2)
+      z = old_div((bounds[4] + bounds[5]),2)
+      radius = old_div(min(bounds[1]-bounds[0],bounds[3]-bounds[2],bounds[5]-bounds[4]), 3.0)
     else:
       radius = 50
       x = y = z = 0

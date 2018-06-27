@@ -1,4 +1,7 @@
 from __future__ import division
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 import os
 import logging
 import qt
@@ -14,7 +17,7 @@ try:
 except ImportError:
   NUMPY_AVAILABLE = False
 
-import DataProbeUtil
+from . import DataProbeUtil
 
 class SliceAnnotations(VTKObservationMixin):
   """Implement the Qt window showing settings for Slice View Annotations
@@ -674,39 +677,39 @@ class SliceAnnotations(VTKObservationMixin):
               for key in self.cornerTexts[2]:
                 self.cornerTexts[2][key]['text'] = ''
         else:
-          if self.cornerTexts[2].has_key('1-PatientName'):
+          if '1-PatientName' in self.cornerTexts[2]:
             self.cornerTexts[2]['1-PatientName']['text'] = backgroundDicomDic['Patient Name'].replace('^',', ')
-          if self.cornerTexts[2].has_key('2-PatientID'):
+          if '2-PatientID' in self.cornerTexts[2]:
             self.cornerTexts[2]['2-PatientID']['text'] = 'ID: ' + backgroundDicomDic['Patient ID']
           backgroundDicomDic['Patient Birth Date'] = self.formatDICOMDate(backgroundDicomDic['Patient Birth Date'])
-          if self.cornerTexts[2].has_key('3-PatientInfo'):
+          if '3-PatientInfo' in self.cornerTexts[2]:
             self.cornerTexts[2]['3-PatientInfo']['text'] = self.makePatientInfo(backgroundDicomDic)
 
           if (backgroundDicomDic['Series Date'] != foregroundDicomDic['Series Date']):
-            if self.cornerTexts[2].has_key('4-Bg-SeriesDate'):
+            if '4-Bg-SeriesDate' in self.cornerTexts[2]:
               self.cornerTexts[2]['4-Bg-SeriesDate']['text'] = 'B: ' + self.formatDICOMDate(backgroundDicomDic['Series Date'])
-            if self.cornerTexts[2].has_key('5-Fg-SeriesDate'):
+            if '5-Fg-SeriesDate' in self.cornerTexts[2]:
               self.cornerTexts[2]['5-Fg-SeriesDate']['text'] = 'F: ' + self.formatDICOMDate(foregroundDicomDic['Series Date'])
           else:
-            if self.cornerTexts[2].has_key('4-Bg-SeriesDate'):
+            if '4-Bg-SeriesDate' in self.cornerTexts[2]:
               self.cornerTexts[2]['4-Bg-SeriesDate']['text'] =  self.formatDICOMDate(backgroundDicomDic['Series Date'])
 
           if (backgroundDicomDic['Series Time'] != foregroundDicomDic['Series Time']):
-            if self.cornerTexts[2].has_key('6-Bg-SeriesTime'):
+            if '6-Bg-SeriesTime' in self.cornerTexts[2]:
               self.cornerTexts[2]['6-Bg-SeriesTime']['text'] = 'B: ' + self.formatDICOMTime(backgroundDicomDic['Series Time'])
-            if self.cornerTexts[2].has_key('7-Fg-SeriesTime'):
+            if '7-Fg-SeriesTime' in self.cornerTexts[2]:
               self.cornerTexts[2]['7-Fg-SeriesTime']['text'] = 'F: ' + self.formatDICOMTime(foregroundDicomDic['Series Time'])
           else:
-            if self.cornerTexts[2].has_key('6-Bg-SeriesTime'):
+            if '6-Bg-SeriesTime' in self.cornerTexts[2]:
               self.cornerTexts[2]['6-Bg-SeriesTime']['text'] = self.formatDICOMTime(backgroundDicomDic['Series Time'])
 
           if (backgroundDicomDic['Series Description'] != foregroundDicomDic['Series Description']):
-            if self.cornerTexts[2].has_key('8-Bg-SeriesDescription'):
+            if '8-Bg-SeriesDescription' in self.cornerTexts[2]:
               self.cornerTexts[2]['8-Bg-SeriesDescription']['text'] = 'B: ' + backgroundDicomDic['Series Description']
-            if self.cornerTexts[2].has_key('9-Fg-SeriesDescription'):
+            if '9-Fg-SeriesDescription' in self.cornerTexts[2]:
               self.cornerTexts[2]['9-Fg-SeriesDescription']['text'] = 'F: ' + foregroundDicomDic['Series Description']
           else:
-            if self.cornerTexts[2].has_key('8-Bg-SeriesDescription'):
+            if '8-Bg-SeriesDescription' in self.cornerTexts[2]:
               self.cornerTexts[2]['8-Bg-SeriesDescription']['text'] = backgroundDicomDic['Series Description']
 
     # Only Background or Only Foreground
@@ -815,7 +818,7 @@ class SliceAnnotations(VTKObservationMixin):
 
   def resetTexts(self):
     for i, cornerText in enumerate(self.cornerTexts):
-      for key in cornerText.keys():
+      for key in list(cornerText.keys()):
         self.cornerTexts[i][key]['text'] = ''
 
   def extractDICOMValues(self, uid):
@@ -823,7 +826,7 @@ class SliceAnnotations(VTKObservationMixin):
     # Used cached tags, if found.
     # DICOM objects are not allowed to be changed,
     # so if the UID matches then the content has to match as well
-    if uid in self.extractedDICOMValuesCache.keys():
+    if uid in list(self.extractedDICOMValuesCache.keys()):
       return self.extractedDICOMValuesCache[uid]
 
     p ={}
@@ -845,7 +848,7 @@ class SliceAnnotations(VTKObservationMixin):
     "0018,0080": "Repetition Time",
     "0018,0081": "Echo Time"
     }
-    for tag in tags.keys():
+    for tag in list(tags.keys()):
       value = slicer.dicomDatabase.instanceValue(uid,tag)
       p[tags[tag]] = value
 

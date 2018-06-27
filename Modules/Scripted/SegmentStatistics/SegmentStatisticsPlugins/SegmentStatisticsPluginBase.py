@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import vtk
 import qt
 import slicer
@@ -162,7 +164,7 @@ class SegmentStatisticsPluginBase(object):
     pluginName = self.__class__.__name__
     isEnabled = self.parameterNode.GetParameter(pluginName+'.enabled')!='False'
     self.pluginCheckbox.checked = isEnabled
-    for (key, checkbox) in self.requestedKeysCheckboxes.iteritems():
+    for (key, checkbox) in self.requestedKeysCheckboxes.items():
       parameter = self.toLongKey(key)+'.enabled'
       value = self.parameterNode.GetParameter(parameter)=='True'
       if checkbox.checked!=value:
@@ -179,7 +181,7 @@ class SegmentStatisticsPluginBase(object):
       return
     pluginName = self.__class__.__name__
     self.parameterNode.SetParameter(pluginName+'.enabled', str(self.pluginCheckbox.checked))
-    for (key, checkbox) in self.requestedKeysCheckboxes.iteritems():
+    for (key, checkbox) in self.requestedKeysCheckboxes.items():
       parameter = self.toLongKey(key)+'.enabled'
       newValue = str(checkbox.checked)
       currentValue = self.parameterNode.GetParameter(parameter)
@@ -189,7 +191,7 @@ class SegmentStatisticsPluginBase(object):
   def requestAll(self):
     if not self.parameterNode:
       return
-    for (key, checkbox) in self.requestedKeysCheckboxes.iteritems():
+    for (key, checkbox) in self.requestedKeysCheckboxes.items():
       parameter = self.toLongKey(key)+'.enabled'
       newValue = str(True)
       currentValue = self.parameterNode.GetParameter(parameter)
@@ -199,7 +201,7 @@ class SegmentStatisticsPluginBase(object):
   def requestNone(self):
     if not self.parameterNode:
       return
-    for (key, checkbox) in self.requestedKeysCheckboxes.iteritems():
+    for (key, checkbox) in self.requestedKeysCheckboxes.items():
       parameter = self.toLongKey(key)+'.enabled'
       newValue = str(False)
       currentValue = self.parameterNode.GetParameter(parameter)

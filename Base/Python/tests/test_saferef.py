@@ -68,6 +68,8 @@
 #  OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##############################################################################
+from builtins import range
+from builtins import object
 from saferef import safeRef
 import unittest
 
@@ -87,14 +89,14 @@ class SaferefTests(unittest.TestCase):
     def setUp(self):
         ts = []
         ss = []
-        for x in xrange(5000):
+        for x in range(5000):
             t = Test1()
             ts.append(t)
             s = safeRef(t.x, self._closure)
             ss.append(s)
         ts.append(test2)
         ss.append(safeRef(test2, self._closure))
-        for x in xrange(30):
+        for x in range(30):
             t = Test2()
             ts.append(t)
             s = safeRef(t, self._closure)
@@ -124,10 +126,10 @@ class SaferefTests(unittest.TestCase):
             sd[s] = 1
         for t in self.ts:
             if hasattr(t, 'x'):
-                self.assertTrue(sd.has_key(safeRef(t.x)))
+                self.assertTrue(safeRef(t.x) in sd)
                 self.assertTrue(safeRef(t.x) in sd)
             else:
-                self.assertTrue(sd.has_key(safeRef(t)))
+                self.assertTrue(safeRef(t) in sd)
                 self.assertTrue(safeRef(t) in sd)
 
     def testRepresentation(self):

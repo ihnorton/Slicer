@@ -1,11 +1,13 @@
+from __future__ import absolute_import
+from builtins import range
 import os
 import vtk
 import qt
 import ctk
 import slicer
-from EditOptions import HelpButton
-from EditUtil import EditUtil
-import Effect
+from .EditOptions import HelpButton
+from .EditUtil import EditUtil
+from . import Effect
 
 __all__ = [
   'MakeModelEffectOptions',
@@ -146,7 +148,7 @@ class MakeModelEffectOptions(Effect.EffectOptions):
       self.parameterNode.InvokePendingModifiedEvent()
 
   def getUniqueModelName(self, baseName):
-      names = slicer.util.getNodes().keys()
+      names = list(slicer.util.getNodes().keys())
       name = baseName
       index = 0
       while names.__contains__(name):
@@ -236,7 +238,7 @@ class MakeModelEffectLogic(Effect.EffectLogic):
     #
     numNodes = slicer.mrmlScene.GetNumberOfNodesByClass( "vtkMRMLModelHierarchyNode" )
     outHierarchy = None
-    for n in xrange(numNodes):
+    for n in range(numNodes):
       node = slicer.mrmlScene.GetNthNodeByClass( n, "vtkMRMLModelHierarchyNode" )
       if node.GetName() == "Editor Models":
         outHierarchy = node

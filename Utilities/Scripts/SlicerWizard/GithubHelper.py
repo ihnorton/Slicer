@@ -1,5 +1,9 @@
 """Helpers for interacting with github."""
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import git
 import os
 import subprocess
@@ -7,7 +11,7 @@ import subprocess
 from github import Github
 from github.GithubObject import NotSet
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 __all__ = [
   'logIn',

@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import filter
+from builtins import object
 import os
 
 import slicer
@@ -33,7 +36,7 @@ class ModuleInfo(object):
 
   #---------------------------------------------------------------------------
   def __unicode__(self):
-    return unicode(self.path)
+    return str(self.path)
 
   #---------------------------------------------------------------------------
   @staticmethod

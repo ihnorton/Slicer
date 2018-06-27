@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os, string
 import unittest
 import qt, ctk, slicer
@@ -6,7 +10,7 @@ import importlib
 
 __all__ = ['ScriptedLoadableModule', 'ScriptedLoadableModuleWidget', 'ScriptedLoadableModuleLogic', 'ScriptedLoadableModuleTest']
 
-class ScriptedLoadableModule:
+class ScriptedLoadableModule(object):
   def __init__(self, parent):
     self.parent = parent
     self.moduleName = self.__class__.__name__
@@ -64,7 +68,7 @@ This work is partially supported by PAR-07-249: R01CA131718 NA-MIC Virtual Colon
     testCase = TestCaseClass()
     testCase.runTest()
 
-class ScriptedLoadableModuleWidget:
+class ScriptedLoadableModuleWidget(object):
   def __init__(self, parent = None):
     """If parent widget is not specified: a top-level widget is created automatically;
     the application has to delete this widget (by calling widget.parent.deleteLater() to avoid memory leaks.
@@ -179,7 +183,7 @@ class ScriptedLoadableModuleWidget:
       self.onReload()
       test = slicer.selfTests[self.moduleName]
       test()
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       errorMessage = "Reload and Test: Exception!\n\n" + str(e) + "\n\nSee Python Console for Stack Trace"
@@ -189,7 +193,7 @@ class ScriptedLoadableModuleWidget:
     filePath = slicer.util.modulePath(self.moduleName)
     qt.QDesktopServices.openUrl(qt.QUrl("file:///"+filePath, qt.QUrl.TolerantMode))
 
-class ScriptedLoadableModuleLogic():
+class ScriptedLoadableModuleLogic(object):
   def __init__(self, parent = None):
     # Get module name by stripping 'Logic' from the class name
     self.moduleName = self.__class__.__name__
@@ -212,7 +216,7 @@ class ScriptedLoadableModuleLogic():
     If no parameter nodes are available for this module then a new one is created.
     """
     numberOfScriptedModuleNodes =  slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLScriptedModuleNode")
-    for nodeIndex in xrange(numberOfScriptedModuleNodes):
+    for nodeIndex in range(numberOfScriptedModuleNodes):
       parameterNode  = slicer.mrmlScene.GetNthNodeByClass( nodeIndex, "vtkMRMLScriptedModuleNode" )
       if parameterNode.GetAttribute("ModuleName") == self.moduleName:
         return parameterNode
@@ -228,7 +232,7 @@ class ScriptedLoadableModuleLogic():
     """
     foundParameterNodes = []
     numberOfScriptedModuleNodes =  slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLScriptedModuleNode")
-    for nodeIndex in xrange(numberOfScriptedModuleNodes):
+    for nodeIndex in range(numberOfScriptedModuleNodes):
       parameterNode  = slicer.mrmlScene.GetNthNodeByClass( nodeIndex, "vtkMRMLScriptedModuleNode" )
       if parameterNode.GetAttribute("ModuleName") == self.moduleName:
         foundParameterNodes.append(parameterNode)

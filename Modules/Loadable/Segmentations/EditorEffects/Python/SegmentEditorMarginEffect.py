@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import os
 import vtk, qt, ctk, slicer
 import logging
@@ -78,7 +81,7 @@ class SegmentEditorMarginEffect(AbstractScriptedSegmentEditorEffect):
 
     # size rounded to nearest odd number. If kernel size is even then image gets shifted.
     marginSizeMm = abs(self.scriptedEffect.doubleParameter("MarginSizeMm"))
-    kernelSizePixel = [int(round((marginSizeMm / selectedSegmentLabelmapSpacing[componentIndex]+1)/2)*2-1) for componentIndex in range(3)]
+    kernelSizePixel = [int(round(old_div((old_div(marginSizeMm, selectedSegmentLabelmapSpacing[componentIndex])+1),2))*2-1) for componentIndex in range(3)]
     return kernelSizePixel
 
   def updateGUIFromMRML(self):

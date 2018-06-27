@@ -1,3 +1,10 @@
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +13,7 @@ import vtk, qt, ctk, slicer
 # SliceLinkLogic
 #
 
-class SliceLinkLogic:
+class SliceLinkLogic(object):
   def __init__(self, parent):
     parent.title = "SliceLinkLogic" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -37,7 +44,7 @@ class SliceLinkLogic:
 # qSliceLinkLogicWidget
 #
 
-class SliceLinkLogicWidget:
+class SliceLinkLogicWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -91,7 +98,7 @@ class SliceLinkLogicWidget:
     self.helloWorldButton = helloWorldButton
 
   def onHelloWorldButtonClicked(self):
-    print "Hello World !"
+    print("Hello World !")
 
   def onReload(self,moduleName="SliceLinkLogic"):
     """Generic reload method for any scripted module.
@@ -109,7 +116,7 @@ class SliceLinkLogicWidget:
 # SliceLinkLogicLogic
 #
 
-class SliceLinkLogicLogic:
+class SliceLinkLogicLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -182,7 +189,7 @@ class SliceLinkLogicTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=5767', 'FA.nrrd', slicer.util.loadVolume),
         )
@@ -191,7 +198,7 @@ class SliceLinkLogicTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -255,12 +262,12 @@ class SliceLinkLogicTest(unittest.TestCase):
     # Note: we validate on fov[1] when resetting the field of view (fov[0] can
     # differ by a few units)
     self.delayDisplay('Broadcasted a reset of the field of view to all Compare Views')
-    diff = abs(compareNode2.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-    print "Field of view of comparison (y) between compare viewers #1 and #2: " + str(diff)
+    diff = old_div(abs(compareNode2.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]), compareNode.GetFieldOfView()[1])
+    print("Field of view of comparison (y) between compare viewers #1 and #2: " + str(diff))
     self.assertLess(diff, eps)
 
-    diff = abs(compareNode3.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-    print "Field of view of comparison (y) between compare viewers #1 and #3: " + str(diff)
+    diff = old_div(abs(compareNode3.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]), compareNode.GetFieldOfView()[1])
+    print("Field of view of comparison (y) between compare viewers #1 and #3: " + str(diff))
     self.assertLess(diff, eps)
     print('')
 
@@ -274,12 +281,12 @@ class SliceLinkLogicTest(unittest.TestCase):
     # Note: we validate on fov[1] when resetting the field of view (fov[0] can
     # differ by a few units)
     self.delayDisplay('Changed the number of lightboxes')
-    diff = abs(compareNode2.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-    print "Field of view of comparison (y) between compare viewers #1 and #2: " + str(diff)
+    diff = old_div(abs(compareNode2.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]), compareNode.GetFieldOfView()[1])
+    print("Field of view of comparison (y) between compare viewers #1 and #2: " + str(diff))
     self.assertLess(diff, eps)
 
-    diff = abs(compareNode3.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]) / compareNode.GetFieldOfView()[1]
-    print "Field of view of comparison between compare viewers #1 and #3: " + str(diff)
+    diff = old_div(abs(compareNode3.GetFieldOfView()[1]-compareNode.GetFieldOfView()[1]), compareNode.GetFieldOfView()[1])
+    print("Field of view of comparison between compare viewers #1 and #3: " + str(diff))
     self.assertLess(diff, eps)
     print('')
 
@@ -291,11 +298,11 @@ class SliceLinkLogicTest(unittest.TestCase):
 
     self.delayDisplay('Broadcasted a pan to all Compare Views')
     diff = abs(compareNode2.GetXYZOrigin()[0]-compareNode.GetXYZOrigin()[0])
-    print "Origin comparison (x) between compare viewers #1 and #2: " + str(diff)
+    print("Origin comparison (x) between compare viewers #1 and #2: " + str(diff))
     self.assertLess(diff, eps)
 
     diff = abs(compareNode3.GetXYZOrigin()[0]-compareNode.GetXYZOrigin()[0])
-    print "Origin comparison (x) between compare viewers #1 and #3: " + str(diff)
+    print("Origin comparison (x) between compare viewers #1 and #3: " + str(diff))
     self.assertLess(diff, eps)
     print('')
 
@@ -307,12 +314,12 @@ class SliceLinkLogicTest(unittest.TestCase):
     # Note: we validate on fov[0] when zooming (fov[1] can differ by
     # a few units)
     self.delayDisplay('Broadcasted a zoom to all Compare Views')
-    diff = abs(compareNode2.GetFieldOfView()[0]-compareNode.GetFieldOfView()[0]) / compareNode.GetFieldOfView()[0]
-    print "Field of view of comparison (x) between compare viewers #1 and #2: " + str(diff)
+    diff = old_div(abs(compareNode2.GetFieldOfView()[0]-compareNode.GetFieldOfView()[0]), compareNode.GetFieldOfView()[0])
+    print("Field of view of comparison (x) between compare viewers #1 and #2: " + str(diff))
     self.assertLess(diff, eps)
 
-    diff = abs(compareNode3.GetFieldOfView()[0]-compareNode.GetFieldOfView()[0]) / compareNode.GetFieldOfView()[0]
-    print "Field of view of comparison (x) between compare viewers #1 and #3: " + str(diff)
+    diff = old_div(abs(compareNode3.GetFieldOfView()[0]-compareNode.GetFieldOfView()[0]), compareNode.GetFieldOfView()[0])
+    print("Field of view of comparison (x) between compare viewers #1 and #3: " + str(diff))
     self.assertLess(diff, eps)
     print('')
 
@@ -322,11 +329,11 @@ class SliceLinkLogicTest(unittest.TestCase):
     logic.EndSliceNodeInteraction()
     self.delayDisplay('Broadcasted a change in slice offset to all Compare Views')
     diff = abs(compareNode2.GetSliceOffset()-compareNode.GetSliceOffset())
-    print "Slice offset comparison between compare viewers #1 and #2: " + str(diff)
+    print("Slice offset comparison between compare viewers #1 and #2: " + str(diff))
     self.assertLess(diff, eps)
 
     diff = abs(compareNode3.GetSliceOffset()-compareNode.GetSliceOffset())
-    print "Slice offset comparison between compare viewers #1 and #3: " + str(diff)
+    print("Slice offset comparison between compare viewers #1 and #3: " + str(diff))
     self.assertLess(diff, eps)
     print('')
 

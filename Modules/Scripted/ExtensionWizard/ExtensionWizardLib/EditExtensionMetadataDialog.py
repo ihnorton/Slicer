@@ -1,3 +1,5 @@
+from builtins import range
+from builtins import object
 import os
 import re
 import slicer
@@ -85,7 +87,7 @@ class EditExtensionMetadataDialog(object):
   @property
   def contributors(self):
     result = []
-    for row in xrange(self.ui.contributorsList.itemCount):
+    for row in range(self.ui.contributorsList.itemCount):
       item = self.ui.contributorsList.topLevelItem(row)
       name = item.text(0)
       organization = item.text(1)

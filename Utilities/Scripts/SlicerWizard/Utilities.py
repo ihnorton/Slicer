@@ -1,5 +1,9 @@
 """Helpers for interacting with |CLI| users and |VCS| tools."""
 
+from builtins import map
+from builtins import input
+from builtins import range
+from builtins import object
 import argparse
 import logging
 import os
@@ -159,7 +163,7 @@ def inquire(msg, choices=_yesno):
 
   while True:
     try:
-      args = parser.parse_args(raw_input(msg))
+      args = parser.parse_args(input(msg))
       if args.choice in choices:
         return choices[args.choice]
 
@@ -232,7 +236,7 @@ def detectEncoding(data):
     return result["encoding"], result["confidence"]
 
   else:
-    chars = ''.join(map(chr, range(7,14) + range(32, 128)))
+    chars = ''.join(map(chr, list(range(7,14)) + list(range(32, 128))))
     if len(data.translate(None, chars)):
       return None, 0.0
 
@@ -272,7 +276,7 @@ def buildProcessArgs(*args, **kwargs):
 
   result = []
 
-  for k, v in kwargs.items():
+  for k, v in list(kwargs.items()):
     if v is None or v is False:
       continue
 

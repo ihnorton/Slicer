@@ -1,3 +1,9 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +12,7 @@ import vtk, qt, ctk, slicer
 # RSNAQuantTutorial
 #
 
-class RSNAQuantTutorial:
+class RSNAQuantTutorial(object):
   def __init__(self, parent):
     parent.title = "RSNAQuantTutorial" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -37,7 +43,7 @@ class RSNAQuantTutorial:
 # qRSNAQuantTutorialWidget
 #
 
-class RSNAQuantTutorialWidget:
+class RSNAQuantTutorialWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -156,7 +162,7 @@ class RSNAQuantTutorialWidget:
 # RSNAQuantTutorialLogic
 #
 
-class RSNAQuantTutorialLogic:
+class RSNAQuantTutorialLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -311,7 +317,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
 
       self.takeScreenshot('Ruler','Ruler used to measure tumor diameter',-1)
 
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -329,7 +335,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=124185', 'dataset3_PETCT.zip'),
         )
@@ -340,7 +346,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
     self.delayDisplay('Finished with download\n')
 
     self.delayDisplay("Unzipping to  %s" % (slicer.app.temporaryPath))
@@ -369,7 +375,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       yellowController = yellowWidget.sliceController()
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
 
@@ -430,7 +436,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       self.takeScreenshot('PETCT-TumorUptake','No uptake in the area of the primary tumor',-1)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -452,7 +458,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=124184', 'ChangeTrackerScene.mrb', slicer.util.loadScene),
         )
@@ -461,7 +467,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -476,7 +482,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       redController = redWidget.sliceController()
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
 
@@ -501,7 +507,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       slicer.util.clickAndDrag(redWidget,button='Middle')
       self.takeScreenshot('ChangeTracker-Pan','Inspect - pan',-1)
 
-      for offset in xrange(-20,20,2):
+      for offset in range(-20,20,2):
         redController.setSliceOffsetValue(offset)
       self.takeScreenshot('ChangeTracker-Scroll','Inspect - scroll',-1)
 
@@ -531,8 +537,8 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       self.takeScreenshot('ChangeTracker-GoForward','Go Forward',-1)
 
       checkList = changeTracker.analyzeROIStep._ChangeTrackerAnalyzeROIStep__metricCheckboxList
-      index = checkList.values().index('IntensityDifferenceMetric')
-      checkList.keys()[index].checked = True
+      index = list(checkList.values()).index('IntensityDifferenceMetric')
+      list(checkList.keys())[index].checked = True
       self.takeScreenshot('ChangeTracker-PickMetric','Select the ROI analysis method',-1)
 
       changeTracker.workflow.goForward()
@@ -546,7 +552,7 @@ class RSNAQuantTutorialTest(unittest.TestCase):
       compareWidget = layoutManager.sliceWidget('Compare1')
       style = compareWidget.interactorStyle()
       interactor = style.GetInteractor()
-      for step in xrange(100):
+      for step in range(100):
         interactor.SetEventPosition(10,step)
         style.OnMouseMove()
 
@@ -558,13 +564,13 @@ class RSNAQuantTutorialTest(unittest.TestCase):
 
       self.delayDisplay('Inspect - scroll')
       compareController = redWidget.sliceController()
-      for offset in xrange(10,30,2):
+      for offset in range(10,30,2):
         compareController.setSliceOffsetValue(offset)
 
       self.takeScreenshot('ChangeTracker-InspectResults','Inspected results',-1)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))

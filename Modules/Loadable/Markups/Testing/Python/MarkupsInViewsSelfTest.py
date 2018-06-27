@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import time
 import unittest
@@ -7,7 +11,7 @@ import vtk, qt, ctk, slicer
 # MarkupsInViewsSelfTest
 #
 
-class MarkupsInViewsSelfTest:
+class MarkupsInViewsSelfTest(object):
   def __init__(self, parent):
     parent.title = "MarkupsInViewsSelfTest"
     parent.categories = ["Testing.TestCases"]
@@ -38,7 +42,7 @@ class MarkupsInViewsSelfTest:
 # qMarkupsInViewsSelfTestWidget
 #
 
-class MarkupsInViewsSelfTestWidget:
+class MarkupsInViewsSelfTestWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -123,7 +127,7 @@ class MarkupsInViewsSelfTestWidget:
       evalString = 'globals()["%s"].%sTest()' % (moduleName, moduleName)
       tester = eval(evalString)
       tester.runTest()
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       slicer.util.warningDisplay('Exception!\n\n' + str(e) + "\n\nSee Python Console for Stack Trace",
@@ -134,7 +138,7 @@ class MarkupsInViewsSelfTestWidget:
 # MarkupsInViewsSelfTestLogic
 #
 
-class MarkupsInViewsSelfTestLogic:
+class MarkupsInViewsSelfTestLogic(object):
 
   def __init__(self):
     pass
@@ -184,25 +188,25 @@ class MarkupsInViewsSelfTestLogic:
   def printViewNodeIDs(self, displayNode):
     numIDs = displayNode.GetNumberOfViewNodeIDs()
     if numIDs == 0:
-      print 'No view node ids for display node',displayNode.GetID()
+      print('No view node ids for display node',displayNode.GetID())
       return
-    print 'View node ids for display node',displayNode.GetID()
+    print('View node ids for display node',displayNode.GetID())
     for i in range(numIDs):
       id = displayNode.GetNthViewNodeID(i)
-      print id
+      print(id)
 
   def printViewAndSliceNodes(self):
     numViewNodes = slicer.mrmlScene.GetNumberOfNodesByClass('vtkMRMLViewNode')
-    print 'Number of view nodes = ', numViewNodes
+    print('Number of view nodes = ', numViewNodes)
     for vn in range(numViewNodes):
       viewNode = slicer.mrmlScene.GetNthNodeByClass(vn, 'vtkMRMLViewNode')
-      print '\t',viewNode.GetName(),"id =",viewNode.GetID()
+      print('\t',viewNode.GetName(),"id =",viewNode.GetID())
 
     numSliceNodes = slicer.mrmlScene.GetNumberOfNodesByClass('vtkMRMLSliceNode')
-    print 'Number of slice nodes = ', numSliceNodes
+    print('Number of slice nodes = ', numSliceNodes)
     for sn in range(numSliceNodes):
       sliceNode = slicer.mrmlScene.GetNthNodeByClass(sn, 'vtkMRMLSliceNode')
-      print '\t',sliceNode.GetName(),"id =",sliceNode.GetID()
+      print('\t',sliceNode.GetName(),"id =",sliceNode.GetID())
 
   def run(self):
     """
@@ -353,8 +357,8 @@ class MarkupsInViewsSelfTestLogic:
     self.logicDelayDisplay('Show only in green slice')
     if self.widgetVisibleOnSlice(fidNode,'vtkMRMLSliceNodeRed') != 0 or self.widgetVisibleOnSlice(fidNode,'vtkMRMLSliceNodeGreen') != 1:
       self.logicDelayDisplay("Test failed: widget not displayed only on green slice")
-      print '\tred = ',self.widgetVisibleOnSlice(fidNode,'vtkMRMLSliceNodeRed')
-      print '\tgreen =',self.widgetVisibleOnSlice(fidNode,'vtkMRMLSliceNodeGreen')
+      print('\tred = ',self.widgetVisibleOnSlice(fidNode,'vtkMRMLSliceNodeRed'))
+      print('\tgreen =',self.widgetVisibleOnSlice(fidNode,'vtkMRMLSliceNodeGreen'))
       self.printViewNodeIDs(displayNode)
       return False
 

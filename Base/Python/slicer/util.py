@@ -1,10 +1,18 @@
 
 from __future__ import print_function
+from __future__ import division
 
 #
 # General
 #
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from past.builtins import basestring
+from past.utils import old_div
+from builtins import object
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
@@ -88,9 +96,9 @@ def startupEnvironment():
   if os.name == 'nt':
     # On Windows, subprocess functions expect environment to contain strings
     # and Qt provide us unicode strings, so we need to convert them.
-    return {str(varname): str(startupEnv.value(varname)) for varname in startupEnv.keys()}
+    return {str(varname): str(startupEnv.value(varname)) for varname in list(startupEnv.keys())}
   else:
-    return {varname: startupEnv.value(varname) for varname in startupEnv.keys()}
+    return {varname: startupEnv.value(varname) for varname in list(startupEnv.keys())}
 
 #
 # Custom Import
@@ -221,7 +229,7 @@ def findChildren(widget=None, name="", text="", title="", className=""):
   parents = [widget]
   kwargs = {'name': name, 'text': text, 'title': title, 'className': className}
   expected_matches = []
-  for kwarg in kwargs.iterkeys():
+  for kwarg in kwargs.keys():
     if kwargs[kwarg]:
       expected_matches.append(kwarg)
   while parents:
@@ -654,7 +662,7 @@ def getNode(pattern="*", index=0, scene=None):
   nodes = getNodes(pattern, scene)
   if not nodes:
     raise MRMLNodeNotFoundException("could not find nodes in the scene by name or id '%s'" % (pattern if (type(pattern) == str) else ""))
-  return nodes.values()[index]
+  return list(nodes.values())[index]
 
 def getNodesByClass(className, scene=None):
   """Return all nodes in the scene of the specified class.
@@ -688,7 +696,7 @@ def getFirstNodeByName(name, className=None):
   scene = slicer.mrmlScene
   return scene.GetFirstNode(name, className, False, False)
 
-class NodeModify:
+class NodeModify(object):
   """Context manager to conveniently compress mrml node modified event.
   """
   def __init__(self, node):
@@ -1107,7 +1115,7 @@ def messageBox(text, parent=None, **kwargs):
   import ctk
   mbox = ctk.ctkMessageBox(parent if parent else mainWindow())
   mbox.text = text
-  for key, value in kwargs.iteritems():
+  for key, value in kwargs.items():
     if hasattr(mbox, key):
       setattr(mbox, key, value)
   # Windows 10 peek feature in taskbar shows all hidden but not destroyed windows
@@ -1134,7 +1142,7 @@ def createProgressDialog(parent=None, value=0, maximum=100, labelText="", window
   progressIndicator.value = value
   progressIndicator.windowTitle = windowTitle
   progressIndicator.labelText = labelText
-  for key, value in kwargs.iteritems():
+  for key, value in kwargs.items():
     if hasattr(progressIndicator, key):
       setattr(progressIndicator, key, value)
   return progressIndicator
@@ -1216,8 +1224,8 @@ interactor.AddObserver(vtk.vtkCommand.LeftButtonPressEvent, onClick)
     interactor.SetEventPosition(end[0], end[1])
     interactor.MouseMoveEvent()
   else:
-    for step in xrange(steps):
-      frac = float(step)/(steps-1)
+    for step in range(steps):
+      frac = old_div(float(step),(steps-1))
       x = int(start[0] + frac*(end[0]-start[0]))
       y = int(start[1] + frac*(end[1]-start[1]))
       interactor.SetEventPosition(x,y)
@@ -1236,9 +1244,9 @@ def downloadFile(url, targetFilePath):
   if not os.path.exists(targetFilePath) or os.stat(targetFilePath).st_size == 0:
     logging.info('Downloading from\n  %s\nas file\n  %s\nIt may take a few minutes...' % (url,targetFilePath))
     try:
-      import urllib
-      urllib.urlretrieve(url, targetFilePath)
-    except Exception, e:
+      import urllib.request, urllib.parse, urllib.error
+      urllib.request.urlretrieve(url, targetFilePath)
+    except Exception as e:
       import traceback
       traceback.print_exc()
       logging.error('Failed to download file from ' + url)
@@ -1388,11 +1396,11 @@ def plot(narray, xColumnIndex = -1, columnNames = None, title = None, show = Tru
 
   # Retrieve nodes that must be reused
   if nodes is not None:
-    if nodes.has_key('chart'):
+    if 'chart' in nodes:
       chartNode = nodes['chart']
-    if nodes.has_key('table'):
+    if 'table' in nodes:
       tableNode = nodes['table']
-    if nodes.has_key('series'):
+    if 'series' in nodes:
       seriesNodes = nodes['series']
 
   # Create table node

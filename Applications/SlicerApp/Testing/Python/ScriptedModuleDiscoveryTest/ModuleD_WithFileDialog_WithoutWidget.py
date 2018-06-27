@@ -1,4 +1,5 @@
 
+from builtins import object
 from slicer.ScriptedLoadableModule import *
 
 SOMEVAR = 'D'
@@ -20,7 +21,7 @@ class ModuleD_WithFileDialog_WithoutWidget(ScriptedLoadableModule):
     return SOMEVAR
 
 
-class DICOMFileDialog:
+class DICOMFileDialog(object):
 
   def __init__(self,qSlicerFileDialog):
     self.qSlicerFileDialog = qSlicerFileDialog

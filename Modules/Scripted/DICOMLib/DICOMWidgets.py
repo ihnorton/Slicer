@@ -1,3 +1,10 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import os, copy
 import qt
 import vtk
@@ -38,7 +45,7 @@ def setDatabasePrecacheTags(dicomBrowser=None):
   tagsToPrecache = list(slicer.dicomDatabase.tagsToPrecache)
   for pluginClass in slicer.modules.dicomPlugins:
     plugin = slicer.modules.dicomPlugins[pluginClass]()
-    tagsToPrecache += plugin.tags.values()
+    tagsToPrecache += list(plugin.tags.values())
   tagsToPrecache = list(set(tagsToPrecache))  # remove duplicates
   tagsToPrecache.sort()
   slicer.dicomDatabase.tagsToPrecache = tagsToPrecache
@@ -63,7 +70,7 @@ class SizePositionSettingsMixin(object):
     self.resize(self.settings.value("size",
                                     qt.QSize(int(parent.width*3/4), int(parent.height*3/4))))
     self.move(self.settings.value("pos",
-                                  qt.QPoint(screenPos.x() + (parent.width - self.width)/2, screenPos.y())))
+                                  qt.QPoint(screenPos.x() + old_div((parent.width - self.width),2), screenPos.y())))
     self.settings.endGroup()
 
     # If window position is no longer valid (for example because the window was
@@ -362,7 +369,7 @@ class DICOMDetailsBase(VTKObservationMixin, SizePositionSettingsMixin):
 
     # Hide the settings button if all associated widgets should be hidden
     settingsButtonHidden = True
-    for groupName in self.settingsWidgetNames.keys():
+    for groupName in list(self.settingsWidgetNames.keys()):
       settingsButtonHidden = settingsButtonHidden and not settingsValue('DICOM/%s.visible' % groupName, True,
                                                                         converter=toBool)
     self.settingsButton.visible = not settingsButtonHidden
@@ -566,7 +573,7 @@ class DICOMDetailsBase(VTKObservationMixin, SizePositionSettingsMixin):
     self.settings.setValue('DICOM/BrowserPersistent', bool(self.browserPersistent))
 
   def onSettingsButton(self, status):
-    for groupName in self.settingsWidgetNames.keys():
+    for groupName in list(self.settingsWidgetNames.keys()):
       visible = settingsValue('DICOM/%s.visible' % groupName, True, converter=toBool)
       for name in self.settingsWidgetNames[groupName]:
         control = self._findChildren(name)
@@ -619,7 +626,7 @@ class DICOMDetailsBase(VTKObservationMixin, SizePositionSettingsMixin):
     for plugin in self.loadablesByPlugin:
       for loadable in self.loadablesByPlugin[plugin]:
         seriesUID = slicer.dicomDatabase.fileValue(loadable.files[0], seriesUIDTag)
-        if not loadablesBySeries.has_key(seriesUID):
+        if seriesUID not in loadablesBySeries:
           loadablesBySeries[seriesUID] = [loadable]
         else:
           loadablesBySeries[seriesUID].append(loadable)
@@ -716,7 +723,7 @@ class DICOMDetailsBase(VTKObservationMixin, SizePositionSettingsMixin):
     progress = slicer.util.createProgressDialog(parent=self, value=0, maximum=len(plugins))
 
     for step, pluginClass in enumerate(plugins):
-      if not self.pluginInstances.has_key(pluginClass):
+      if pluginClass not in self.pluginInstances:
         self.pluginInstances[pluginClass] = slicer.modules.dicomPlugins[pluginClass]()
       plugin = self.pluginInstances[pluginClass]
       if progress.wasCanceled:
@@ -732,12 +739,12 @@ class DICOMDetailsBase(VTKObservationMixin, SizePositionSettingsMixin):
         if not loadablesByPlugin[plugin]:
           loadablesByPlugin[plugin] = plugin.examine(fileLists)
         loadEnabled = loadEnabled or loadablesByPlugin[plugin] != []
-      except Exception, e:
+      except Exception as e:
         import traceback
         traceback.print_exc()
         slicer.util.warningDisplay("Warning: Plugin failed: %s\n\nSee python console for error message." % pluginClass,
                                    windowTitle="DICOM", parent=self)
-        print "DICOM Plugin failed: %s" % str(e)
+        print("DICOM Plugin failed: %s" % str(e))
 
     progress.close()
 
@@ -758,7 +765,7 @@ class DICOMDetailsBase(VTKObservationMixin, SizePositionSettingsMixin):
         isEqual = True
         for pair in zip(inputFileListCopy, loadableFileListCopy):
           if pair[0] != pair[1]:
-            print "{} != {}".format(pair[0], pair[1])
+            print("{} != {}".format(pair[0], pair[1]))
             isEqual = False
             break
         if not isEqual:
@@ -855,7 +862,7 @@ class DICOMDetailsBase(VTKObservationMixin, SizePositionSettingsMixin):
 
     self.addObserver(slicer.mrmlScene, slicer.vtkMRMLScene.NodeAddedEvent, onNodeAdded)
 
-    for step, (loadable, plugin) in enumerate(selectedLoadables.iteritems(), start=1):
+    for step, (loadable, plugin) in enumerate(iter(selectedLoadables.items()), start=1):
       if progress.wasCanceled:
         break
       updateProgress(value=step, text='\nLoading %s' % loadable.name)
@@ -1082,7 +1089,7 @@ class DICOMPluginSelector(qt.QWidget):
       size = settings.beginReadArray('DICOM/disabledPlugins')
       disabledPlugins = []
 
-      for i in xrange(size):
+      for i in range(size):
         settings.setArrayIndex(i)
         disabledPlugins.append(str(settings.allKeys()[0]))
       settings.endArray()
@@ -1131,7 +1138,7 @@ class DICOMLoadableTable(qt.QTableWidget):
     slicer.app.connect('aboutToQuit()', self.deleteLater)
 
   def getNumberOfCheckedItems(self):
-    return sum(1 for row in xrange(self.rowCount) if self.item(row, 0).checkState() == qt.Qt.Checked)
+    return sum(1 for row in range(self.rowCount) if self.item(row, 0).checkState() == qt.Qt.Checked)
 
   def configure(self):
     self.setColumnCount(3)
@@ -1180,8 +1187,8 @@ class DICOMLoadableTable(qt.QTableWidget):
     self.loadables = {}
 
     for plugin in loadablesByPlugin:
-      for thisLoadableId in xrange(len(loadablesByPlugin[plugin])):
-        for prevLoadableId in xrange(0, thisLoadableId):
+      for thisLoadableId in range(len(loadablesByPlugin[plugin])):
+        for prevLoadableId in range(0, thisLoadableId):
           thisLoadable = loadablesByPlugin[plugin][thisLoadableId]
           prevLoadable = loadablesByPlugin[plugin][prevLoadableId]
           if len(thisLoadable.files) == 1 and len(prevLoadable.files) == 1:
@@ -1205,12 +1212,12 @@ class DICOMLoadableTable(qt.QTableWidget):
     self.setVerticalHeaderLabels(row * [""])
 
   def uncheckAll(self):
-    for row in xrange(self.rowCount):
+    for row in range(self.rowCount):
       item = self.item(row, 0)
       item.setCheckState(False)
 
   def updateSelectedFromCheckstate(self):
-    for row in xrange(self.rowCount):
+    for row in range(self.rowCount):
       item = self.item(row, 0)
       self.loadables[row].selected = (item.checkState() != 0)
       # updating the names
@@ -1368,8 +1375,8 @@ class DICOMRecentActivityWidget(qt.QWidget):
       slicer.util.showStatusMessage(statusMessage, 10000)
 
   def onActivated(self, modelIndex):
-    print 'selected row %d' % modelIndex.row()
-    print self.recentSeries[modelIndex.row()].text
+    print('selected row %d' % modelIndex.row())
+    print(self.recentSeries[modelIndex.row()].text)
     series = self.recentSeries[modelIndex.row()]
     if self.detailsPopup:
       self.detailsPopup.open()
@@ -1405,7 +1412,7 @@ class DICOMSendDialog(qt.QDialog):
       "Destination Address": self.sendAddress,
       "Destination Port": self.sendPort
     }
-    for label in self.dicomParameters.keys():
+    for label in list(self.dicomParameters.keys()):
       self.dicomEntries[label] = qt.QLineEdit()
       self.dicomEntries[label].text = self.dicomParameters[label]
       self.dicomFormLayout.addRow(label + ": ", self.dicomEntries[label])
@@ -1453,8 +1460,8 @@ class DICOMSendDialog(qt.QDialog):
   def centerProgress(self):
     mainWindow = slicer.util.mainWindow()
     screenMainPos = mainWindow.pos
-    x = screenMainPos.x() + (mainWindow.width - self.progress.width)/2
-    y = screenMainPos.y() + (mainWindow.height - self.progress.height)/2
+    x = screenMainPos.x() + old_div((mainWindow.width - self.progress.width),2)
+    y = screenMainPos.y() + old_div((mainWindow.height - self.progress.height),2)
     self.progress.move(x,y)
 
 

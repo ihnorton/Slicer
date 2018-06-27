@@ -11,6 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from builtins import object
 import argparse
 import os
 import sys

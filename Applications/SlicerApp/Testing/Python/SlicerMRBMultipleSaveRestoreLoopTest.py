@@ -1,4 +1,8 @@
+from __future__ import print_function
 
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import unittest
 import ctk
@@ -30,7 +34,7 @@ execfile('/Users/pieper/slicer4/latest/Slicer/Applications/SlicerApp/Testing/Pyt
                      False then confirm basic operation, but allow non-critical issues to pass
     """
     unittest.TestCase.__init__(self,methodName)
-    print 'Setting number of iterations to ',numberOfIterations
+    print('Setting number of iterations to ',numberOfIterations)
     self.numberOfIterations = numberOfIterations
     self.uniqueDirectory = uniqueDirectory
     self.strict = strict
@@ -88,7 +92,7 @@ execfile('/Users/pieper/slicer4/latest/Slicer/Applications/SlicerApp/Testing/Pyt
     self.fiducialPosition = fid1
     for i in range(self.numberOfIterations):
 
-      print '\n\nIteration',i
+      print('\n\nIteration',i)
       #
       # save the mrml scene to an mrb
       #
@@ -125,15 +129,15 @@ execfile('/Users/pieper/slicer4/latest/Slicer/Applications/SlicerApp/Testing/Pyt
 
       # adjust the fid list location
       self.fiducialPosition = [i, i, i]
-      print i, ': reset fiducial position array to ', self.fiducialPosition
+      print(i, ': reset fiducial position array to ', self.fiducialPosition)
       fidNode.SetNthFiducialPositionFromArray(0, self.fiducialPosition)
     self.delayDisplay("Loop Finished")
 
-    print 'Fiducial position from loop = ',self.fiducialPosition
+    print('Fiducial position from loop = ',self.fiducialPosition)
     fidNode = slicer.util.getNode('F')
     finalFiducialPosition = [ 0,0,0 ]
     fidNode.GetNthFiducialPosition(0, finalFiducialPosition)
-    print 'Final fiducial scene pos = ',finalFiducialPosition
+    print('Final fiducial scene pos = ',finalFiducialPosition)
     self.assertEqual(self.fiducialPosition, finalFiducialPosition)
 
     self.delayDisplay("Test Finished")
@@ -159,7 +163,7 @@ execfile('/Users/pieper/slicer4/latest/Slicer/Applications/SlicerApp/Testing/Pyt
 # SlicerMRBMultipleSaveRestoreLoopTest
 #
 
-class SlicerMRBMultipleSaveRestoreLoopTest:
+class SlicerMRBMultipleSaveRestoreLoopTest(object):
   """
   This class is the 'hook' for slicer to detect and recognize the test
   as a loadable scripted module (with a hidden interface)
@@ -200,7 +204,7 @@ class SlicerMRBMultipleSaveRestoreLoopTest:
 # SlicerMRBMultipleSaveRestoreLoopTestWidget
 #
 
-class SlicerMRBMultipleSaveRestoreLoopTestWidget:
+class SlicerMRBMultipleSaveRestoreLoopTestWidget(object):
   def __init__(self, parent = None):
     self.parent = parent
 

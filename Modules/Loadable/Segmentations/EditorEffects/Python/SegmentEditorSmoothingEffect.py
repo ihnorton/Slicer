@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import os
 import vtk, qt, ctk, slicer
 import logging
@@ -118,7 +121,7 @@ If segments overlap, segment higher in the segments table will have priority. <b
 
     # size rounded to nearest odd number. If kernel size is even then image gets shifted.
     kernelSizeMm = self.scriptedEffect.doubleParameter("KernelSizeMm")
-    kernelSizePixel = [int(round((kernelSizeMm / selectedSegmentLabelmapSpacing[componentIndex]+1)/2)*2-1) for componentIndex in range(3)]
+    kernelSizePixel = [int(round(old_div((old_div(kernelSizeMm, selectedSegmentLabelmapSpacing[componentIndex])+1),2))*2-1) for componentIndex in range(3)]
     return kernelSizePixel
 
   def updateGUIFromMRML(self):
@@ -204,7 +207,7 @@ If segments overlap, segment higher in the segments table will have priority. <b
 
         thresh2 = vtk.vtkImageThreshold()
         thresh2.SetInputConnection(gaussianFilter.GetOutputPort())
-        thresh2.ThresholdByUpper(maxValue/2)
+        thresh2.ThresholdByUpper(old_div(maxValue,2))
         thresh2.SetInValue(1)
         thresh2.SetOutValue(0)
         thresh2.SetOutputScalarType(selectedSegmentLabelmap.GetScalarType())

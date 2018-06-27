@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import os
 import vtk, qt, ctk, slicer
 import logging
@@ -83,11 +86,11 @@ class SegmentEditorHollowEffect(AbstractScriptedSegmentEditorEffect):
     if self.scriptedEffect.parameter("ShellMode") == MEDIAL_SURFACE:
       # Size rounded to nearest 2x of odd number, as kernel will be applied on both sides and kernel size must be odd number.
       shellThicknessMm = abs(self.scriptedEffect.doubleParameter("ShellThicknessMm"))
-      kernelSizePixel = [int(round((shellThicknessMm / selectedSegmentLabelmapSpacing[componentIndex]+2)/4)*4) for componentIndex in range(3)]
+      kernelSizePixel = [int(round(old_div((old_div(shellThicknessMm, selectedSegmentLabelmapSpacing[componentIndex])+2),4))*4) for componentIndex in range(3)]
     else:
       # Size rounded to nearest odd number. If kernel size is even then image gets shifted.
       shellThicknessMm = abs(self.scriptedEffect.doubleParameter("ShellThicknessMm"))
-      kernelSizePixel = [int(round((shellThicknessMm / selectedSegmentLabelmapSpacing[componentIndex]+1)/2)*2-1) for componentIndex in range(3)]
+      kernelSizePixel = [int(round(old_div((old_div(shellThicknessMm, selectedSegmentLabelmapSpacing[componentIndex])+1),2))*2-1) for componentIndex in range(3)]
     return kernelSizePixel
 
   def updateGUIFromMRML(self):
@@ -154,7 +157,7 @@ class SegmentEditorHollowEffect(AbstractScriptedSegmentEditorEffect):
     kernelSizePixel = self.getKernelSizePixel()
     if shellMode == MEDIAL_SURFACE:
       # both erosion and dilation will be applied, so kernel size must be half on each side
-      kernelSizePixel = [kernelSizePixel[0]/2, kernelSizePixel[1]/2, kernelSizePixel[2]/2]
+      kernelSizePixel = [old_div(kernelSizePixel[0],2), old_div(kernelSizePixel[1],2), old_div(kernelSizePixel[2],2)]
 
     # We need to know exactly the value of the segment voxels, apply threshold to make force the selected label value
     labelValue = 1

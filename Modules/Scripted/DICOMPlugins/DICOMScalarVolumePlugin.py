@@ -1,3 +1,7 @@
+from builtins import str
+from builtins import map
+from builtins import range
+from builtins import object
 import numpy
 import os
 import vtk, qt, ctk, slicer, vtkITK
@@ -184,11 +188,11 @@ class DICOMScalarVolumePluginClass(DICOMPlugin):
       for tag in subseriesTags:
         value = slicer.dicomDatabase.fileValue(file,self.tags[tag])
         value = value.replace(",","_") # remove commas so it can be used as an index
-        if not subseriesValues.has_key(tag):
+        if tag not in subseriesValues:
           subseriesValues[tag] = []
         if not subseriesValues[tag].__contains__(value):
           subseriesValues[tag].append(value)
-        if not subseriesFiles.has_key((tag,value)):
+        if (tag,value) not in subseriesFiles:
           subseriesFiles[tag,value] = []
         subseriesFiles[tag,value].append(file)
 
@@ -606,11 +610,11 @@ class DICOMScalarVolumePluginClass(DICOMPlugin):
           logging.warning('No geometry information available for DICOM data, skipping corner calculations')
           return None
 
-        position = numpy.array(map(float, positionString.split('\\')))
-        orientation = map(float, orientationString.split('\\'))
+        position = numpy.array(list(map(float, positionString.split('\\'))))
+        orientation = list(map(float, orientationString.split('\\')))
         rowOrientation = numpy.array(orientation[:3])
         columnOrientation = numpy.array(orientation[3:])
-        spacing = numpy.array(map(float, spacingString.split('\\')))
+        spacing = numpy.array(list(map(float, spacingString.split('\\'))))
         # map from LPS to RAS
         lpsToRAS = numpy.array([-1,-1,1])
         position *= lpsToRAS
@@ -683,7 +687,7 @@ class DICOMScalarVolumePluginClass(DICOMPlugin):
 # DICOMScalarVolumePlugin
 #
 
-class DICOMScalarVolumePlugin:
+class DICOMScalarVolumePlugin(object):
   """
   This class is the 'hook' for slicer to detect and recognize the plugin
   as a loadable scripted module

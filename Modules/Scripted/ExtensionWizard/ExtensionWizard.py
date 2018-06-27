@@ -1,3 +1,7 @@
+from __future__ import division
+from past.builtins import basestring
+from past.utils import old_div
+from builtins import object
 import os
 import sys
 import traceback
@@ -27,7 +31,7 @@ def _settingsList(settings, key):
 # ExtensionWizard
 #
 #=============================================================================
-class ExtensionWizard:
+class ExtensionWizard(object):
   #---------------------------------------------------------------------------
   def __init__(self, parent):
     parent.title = "Extension Wizard"
@@ -51,7 +55,7 @@ class ExtensionWizard:
 # ExtensionWizardWidget
 #
 #=============================================================================
-class ExtensionWizardWidget:
+class ExtensionWizardWidget(object):
   #---------------------------------------------------------------------------
   def __init__(self, parent = None):
     if not parent:
@@ -305,7 +309,7 @@ class ExtensionWizardWidget:
     self.extensionContentsView.setRootIndex(ri)
 
     w = self.extensionContentsView.width
-    self.extensionContentsView.setColumnWidth(0, (w * 4) / 9)
+    self.extensionContentsView.setColumnWidth(0, old_div((w * 4), 9))
 
     # Prompt to load scripted modules from extension
     self.loadModules(path)

@@ -1,3 +1,8 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -216,13 +221,13 @@ class EndoscopyWidget(ScriptedLoadableModuleWidget):
       - create the associated model"""
 
     fiducialsNode = self.inputFiducialsNodeSelector.currentNode();
-    print "Calculating Path..."
+    print("Calculating Path...")
     result = EndoscopyComputePath(fiducialsNode)
-    print "-> Computed path contains %d elements" % len(result.path)
+    print("-> Computed path contains %d elements" % len(result.path))
 
-    print "Create Model..."
+    print("Create Model...")
     model = EndoscopyPathModel(result.path, fiducialsNode)
-    print "-> Model created"
+    print("-> Model created")
 
     # Update frame slider range
     self.frameSlider.maximum = len(result.path) - 2
@@ -292,7 +297,7 @@ class EndoscopyWidget(ScriptedLoadableModuleWidget):
       # This can be used for example to show a reformatted slice
       # using with SlicerIGT extension's VolumeResliceDriver module.
       import numpy as np
-      zVec = (foc-p)/np.linalg.norm(foc-p)
+      zVec = old_div((foc-p),np.linalg.norm(foc-p))
       yVec = self.pathPlaneNormal
       xVec = np.cross(yVec, zVec)
       toParent.SetElement(0, 0, xVec[0])
@@ -310,7 +315,7 @@ class EndoscopyWidget(ScriptedLoadableModuleWidget):
       self.cameraNode.EndModify(wasModified)
       self.cameraNode.ResetClippingRange()
 
-class EndoscopyComputePath:
+class EndoscopyComputePath(object):
   """Compute path given a list of fiducials.
   A Hermite spline interpolation is used. See http://en.wikipedia.org/wiki/Cubic_Hermite_spline
 
@@ -342,7 +347,7 @@ class EndoscopyComputePath:
       if self.n == 0:
         return
       self.p = numpy.zeros((self.n,3))
-      for i in xrange(self.n):
+      for i in range(self.n):
         f = collection.GetItemAsObject(i)
         coords = [0,0,0]
         f.GetFiducialCoordinates(coords)
@@ -356,7 +361,7 @@ class EndoscopyComputePath:
       # get fiducial positions
       # sets self.p
       self.p = numpy.zeros((n,3))
-      for i in xrange(n):
+      for i in range(n):
         coord = [0.0, 0.0, 0.0]
         self.fids.GetNthFiducialPosition(i, coord)
         self.p[i] = coord
@@ -369,7 +374,7 @@ class EndoscopyComputePath:
       # get control point data
       # sets self.p
       self.p = numpy.zeros((n,3))
-      for i in xrange(n):
+      for i in range(n):
         self.p[i] = self.fids.GetNthFiducialXYZ(i)
 
     # calculate the tangent vectors
@@ -379,11 +384,11 @@ class EndoscopyComputePath:
     # - sets self.m
     n = self.n
     fm = numpy.zeros((n,3))
-    for i in xrange(0,n-1):
+    for i in range(0,n-1):
       fm[i] = self.p[i+1] - self.p[i]
     self.m = numpy.zeros((n,3))
-    for i in xrange(1,n-1):
-      self.m[i] = (fm[i-1] + fm[i]) / 2.
+    for i in range(1,n-1):
+      self.m[i] = old_div((fm[i-1] + fm[i]), 2.)
     self.m[0] = fm[0]
     self.m[n-1] = fm[n-2]
 
@@ -434,7 +439,7 @@ class EndoscopyComputePath:
       t1 = t + self.dt
       pguess = self.point(segment,t1)
       dist = numpy.linalg.norm(pguess - p0)
-      ratio = self.dl / dist
+      ratio = old_div(self.dl, dist)
       self.dt *= ratio
       if self.dt < 0.00000001:
         return
@@ -449,7 +454,7 @@ class EndoscopyComputePath:
     return (t1, pguess, remainder)
 
 
-class EndoscopyPathModel:
+class EndoscopyPathModel(object):
   """Create a vtkPolyData for a polyline:
        - Add one point per path point.
        - Add a single polyline

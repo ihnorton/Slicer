@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
 import logging
@@ -464,7 +468,7 @@ class SegmentStatisticsLogic(ScriptedLoadableModuleLogic):
 
   def getStatisticsValueAsString(self, segmentID, key):
     statistics = self.getStatistics()
-    if statistics.has_key((segmentID, key)):
+    if (segmentID, key) in statistics:
       value = statistics[segmentID, key]
       if isinstance(value, float):
         return "%0.3f" % value # round to 3 decimals
@@ -479,7 +483,7 @@ class SegmentStatisticsLogic(ScriptedLoadableModuleLogic):
     nonEmptyKeys = []
     for key in self.keys:
       for segmentID in statistics["SegmentIDs"]:
-        if statistics.has_key((segmentID, key)):
+        if (segmentID, key) in statistics:
           nonEmptyKeys.append(key)
           break
     return nonEmptyKeys
@@ -542,10 +546,10 @@ class SegmentStatisticsLogic(ScriptedLoadableModuleLogic):
     for key in keys:
       # create table column appropriate for data type; currently supported: float, int, long, string   
       measurements = [statistics[segmentID, key] for segmentID in statistics["SegmentIDs"] if
-                      statistics.has_key((segmentID, key))]
+                      (segmentID, key) in statistics]
       if len(measurements)==0: # there were not measurements and therefore use the default "string" representation
         col = table.AddColumn()
-      elif type(measurements[0]) in [int, long]:
+      elif type(measurements[0]) in [int, int]:
         col = table.AddColumn(vtk.vtkLongArray())
       elif type(measurements[0]) is float:
         col = table.AddColumn(vtk.vtkDoubleArray())
@@ -561,7 +565,7 @@ class SegmentStatisticsLogic(ScriptedLoadableModuleLogic):
       table.SetColumnLongName(columnName, longColumnName)
       measurementInfo = statistics["MeasurementInfo"][key] if key in statistics["MeasurementInfo"] else {}
       if measurementInfo:
-        for mik, miv in measurementInfo.iteritems():
+        for mik, miv in measurementInfo.items():
           if mik=='description':
             table.SetColumnDescription(columnName, str(miv))
           elif mik=='units':
@@ -574,7 +578,7 @@ class SegmentStatisticsLogic(ScriptedLoadableModuleLogic):
       rowIndex = table.AddEmptyRow()
       columnIndex = 0
       for key in keys:
-        value = statistics[segmentID, key] if statistics.has_key((segmentID, key)) else None
+        value = statistics[segmentID, key] if (segmentID, key) in statistics else None
         if value is None and key!='Segment':
           value = float('nan')
         table.GetTable().GetColumn(columnIndex).SetValue(rowIndex, value)
@@ -605,7 +609,7 @@ class SegmentStatisticsLogic(ScriptedLoadableModuleLogic):
     for segmentID in statistics["SegmentIDs"]:
       csv += "\n" + str(statistics[segmentID,keys[0]])
       for key in keys[1:]:
-        if statistics.has_key((segmentID, key)):
+        if (segmentID, key) in statistics:
           csv += "," + str(statistics[segmentID,key])
         else:
           csv += ","
@@ -899,7 +903,7 @@ class SegmentStatisticsSlicelet(Slicelet):
 # Class for avoiding python error that is caused by the method SegmentStatistics::setup
 # http://www.na-mic.org/Bug/view.php?id=3871
 #
-class SegmentStatisticsFileWriter:
+class SegmentStatisticsFileWriter(object):
   def __init__(self, parent):
     pass
 

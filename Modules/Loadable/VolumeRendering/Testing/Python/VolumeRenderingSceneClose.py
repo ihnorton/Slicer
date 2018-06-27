@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +9,7 @@ import vtk, qt, ctk, slicer
 # VolumeRenderingSceneClose
 #
 
-class VolumeRenderingSceneClose:
+class VolumeRenderingSceneClose(object):
   def __init__(self, parent):
     parent.title = "VolumeRenderingSceneClose"
     parent.categories = ["Testing.TestCases"]
@@ -38,7 +41,7 @@ class VolumeRenderingSceneClose:
 # qVolumeRenderingSceneCloseWidget
 #
 
-class VolumeRenderingSceneCloseWidget:
+class VolumeRenderingSceneCloseWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -123,7 +126,7 @@ class VolumeRenderingSceneCloseWidget:
       evalString = 'globals()["%s"].%sTest()' % (moduleName, moduleName)
       tester = eval(evalString)
       tester.runTest()
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       slicer.util.warningDisplay('Exception!\n\n' + str(e) + "\n\nSee Python Console for Stack Trace",
@@ -134,7 +137,7 @@ class VolumeRenderingSceneCloseWidget:
 # VolumeRenderingSceneCloseLogic
 #
 
-class VolumeRenderingSceneCloseLogic:
+class VolumeRenderingSceneCloseLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import

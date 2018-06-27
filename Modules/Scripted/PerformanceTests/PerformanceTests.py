@@ -1,10 +1,15 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import vtk, qt, ctk, slicer
 
 #
 # PerformanceTests
 #
 
-class PerformanceTests:
+class PerformanceTests(object):
   def __init__(self, parent):
     parent.title = "Performance Tests"
     parent.categories = ["Testing"]
@@ -23,7 +28,7 @@ and others.  This work was partially funded by NIH grant 3P41RR013218-12S1.
 # qPerformanceTestsWidget
 #
 
-class PerformanceTestsWidget:
+class PerformanceTestsWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -81,14 +86,14 @@ class PerformanceTestsWidget:
   def timeSteps(self, iters, f):
     import time
     elapsedTime = 0
-    for i in xrange(iters):
+    for i in range(iters):
       startTime = time.time()
       f()
       slicer.app.processEvents()
       endTime = time.time()
       elapsedTime += (endTime - startTime)
-    fps = iters / elapsedTime
-    result =  "fps = %g (%g ms per frame)" % (fps, 1000./fps)
+    fps = old_div(iters, elapsedTime)
+    result =  "fps = %g (%g ms per frame)" % (fps, old_div(1000.,fps))
     print (result)
     self.log.insertHtml('<i>%s</i>' % result)
     self.log.insertPlainText('\n')
@@ -106,11 +111,11 @@ class PerformanceTestsWidget:
     elapsedTime = 0
     sliceOffset = 5
     offsetSteps = 10
-    numerOfSweeps = int(math.ceil(iters / offsetSteps))
+    numerOfSweeps = int(math.ceil(old_div(iters, offsetSteps)))
     renderingTimesSec = np.zeros(numerOfSweeps*offsetSteps*2)
     sampleIndex = 0
     startOffset = sliceNode.GetSliceOffset()
-    for i in xrange(numerOfSweeps):
+    for i in range(numerOfSweeps):
       for offset in ([sliceOffset]*offsetSteps + [-sliceOffset]*offsetSteps):
         startTime = time.time()
         sliceNode.SetSliceOffset(sliceNode.GetSliceOffset()+offset)
@@ -127,7 +132,7 @@ class PerformanceTestsWidget:
     renderingTimeMean = np.mean(renderingTimesSec)
     renderingTimeStd = np.std(renderingTimesSec)
     result = ("%d x %d, fps = %.1f (%.1f +/- %.2f ms per frame) - see details in table '%s'"
-      % (dims[0], dims[1], 1.0/renderingTimeMean, 1000. * renderingTimeMean, 1000. * renderingTimeStd, resultTableNode.GetName()))
+      % (dims[0], dims[1], old_div(1.0,renderingTimeMean), 1000. * renderingTimeMean, 1000. * renderingTimeStd, resultTableNode.GetName()))
     print (result)
     self.log.insertHtml('<i>%s</i>' % result)
     self.log.insertPlainText('\n')
@@ -148,7 +153,7 @@ class PerformanceTestsWidget:
     elapsedTime = 0
     startPoint = (int(dims[0]*0.3), int(dims[1]*0.3))
     endPoint = (int(dims[0]*0.6), int(dims[1]*0.6))
-    for i in xrange(iters):
+    for i in range(iters):
       startTime = time.time()
       slicer.util.clickAndDrag(firstSliceWidget, button = None, modifiers = ['Shift'], start=startPoint, end=endPoint, steps=2)
       slicer.app.processEvents()
@@ -156,10 +161,10 @@ class PerformanceTestsWidget:
       slicer.util.clickAndDrag(firstSliceWidget, button = None, modifiers = ['Shift'], start=endPoint, end=startPoint, steps=2)
       slicer.app.processEvents()
       endTime2 = time.time()
-      delta = ((endTime1-startTime) + (endTime2 - endTime1)) / 2.
+      delta = old_div(((endTime1-startTime) + (endTime2 - endTime1)), 2.)
       elapsedTime += delta
-    fps = iters / elapsedTime
-    result = "number of slice views = %d, fps = %g (%g ms per frame)" % (len(sliceViewNames), fps, 1000./fps)
+    fps = old_div(iters, elapsedTime)
+    result = "number of slice views = %d, fps = %g (%g ms per frame)" % (len(sliceViewNames), fps, old_div(1000.,fps))
     print (result)
     self.log.insertHtml('<i>%s</i>' % result)
     self.log.insertPlainText('\n')
@@ -195,20 +200,20 @@ class PerformanceTestsWidget:
     dn = slicer.mrmlScene.AddNode(slicer.vtkMRMLDoubleArrayNode())
     a = dn.GetArray()
     a.SetNumberOfTuples(600)
-    x = range(0, 600)
+    x = list(range(0, 600))
     phase = random.random()
     for i in range(len(x)):
-        a.SetComponent(i, 0, x[i]/50.0)
-        a.SetComponent(i, 1, math.sin(phase+x[i]/50.0))
+        a.SetComponent(i, 0, old_div(x[i],50.0))
+        a.SetComponent(i, 1, math.sin(phase+old_div(x[i],50.0)))
         a.SetComponent(i, 2, 0)
 
     dn2 = slicer.mrmlScene.AddNode(slicer.vtkMRMLDoubleArrayNode())
     a = dn2.GetArray()
     a.SetNumberOfTuples(600)
-    x = range(0, 600)
+    x = list(range(0, 600))
     for i in range(len(x)):
-        a.SetComponent(i, 0, x[i]/50.0)
-        a.SetComponent(i, 1, math.cos(phase+x[i]/50.0))
+        a.SetComponent(i, 0, old_div(x[i],50.0))
+        a.SetComponent(i, 1, math.cos(phase+old_div(x[i],50.0)))
         a.SetComponent(i, 2, 0)
 
     cn = slicer.mrmlScene.AddNode(slicer.vtkMRMLChartNode())
@@ -224,14 +229,14 @@ class PerformanceTestsWidget:
     cvn.SetChartNodeID(cn.GetID())
 
     cn = slicer.mrmlScene.AddNode(slicer.vtkMRMLChartNode())
-    print cn.GetID()
+    print(cn.GetID())
     cn.AddArray('Just one array', dn.GetID())
     cn.SetProperty('default', 'title', 'A simple chart with 1 curve')
     cn.SetProperty('default', 'xAxisLabel', 'Just x')
     cn.SetProperty('default', 'yAxisLabel', 'Just y')
 
     cn = slicer.mrmlScene.AddNode(slicer.vtkMRMLChartNode())
-    print cn.GetID()
+    print(cn.GetID())
     cn.AddArray('The other array', dn2.GetID())
     cn.SetProperty('default', 'title', 'A simple chart with another curve')
     cn.SetProperty('default', 'xAxisLabel', 'time')
@@ -241,17 +246,17 @@ class PerformanceTestsWidget:
     cn.SetProperty('The other array', 'color', '#fe7d20')
 
     dn3 = slicer.mrmlScene.AddNode(slicer.vtkMRMLDoubleArrayNode())
-    print dn3.GetID()
+    print(dn3.GetID())
     a = dn3.GetArray()
     a.SetNumberOfTuples(12)
-    x = range(0, 12)
+    x = list(range(0, 12))
     for i in range(len(x)):
-        a.SetComponent(i, 0, x[i]/4.0)
-        a.SetComponent(i, 1, math.sin(x[i]/4.0))
+        a.SetComponent(i, 0, old_div(x[i],4.0))
+        a.SetComponent(i, 1, math.sin(old_div(x[i],4.0)))
         a.SetComponent(i, 2, 0)
 
     cn = slicer.mrmlScene.AddNode(slicer.vtkMRMLChartNode())
-    print cn.GetID()
+    print(cn.GetID())
     cn.AddArray('Periodic', dn3.GetID())
     cn.SetProperty('default', 'title', 'A bar chart')
     cn.SetProperty('default', 'xAxisLabel', 'time')
@@ -327,7 +332,7 @@ class PerformanceTestsWidget:
 
 
 
-class sliceLogicTest:
+class sliceLogicTest(object):
   def __init__(self):
     self.step = 0
     self.sliceLogic = slicer.vtkMRMLSliceLayerLogic()

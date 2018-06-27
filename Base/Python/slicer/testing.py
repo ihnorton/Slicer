@@ -1,8 +1,10 @@
+from __future__ import print_function
 
 #
 # Testing
 #
 
+from past.builtins import basestring
 def exitSuccess():
   pass
 
@@ -16,9 +18,9 @@ def runUnitTest(path, testname):
     sys.path.append(path)
   else:
     sys.path.extend(path)
-  print "-------------------------------------------"
-  print "path: %s\ntestname: %s" % (path, testname)
-  print "-------------------------------------------"
+  print("-------------------------------------------")
+  print("path: %s\ntestname: %s" % (path, testname))
+  print("-------------------------------------------")
   suite = unittest.TestLoader().loadTestsFromName(testname)
   result = unittest.TextTestRunner(verbosity=2).run(suite)
   if not result.wasSuccessful():

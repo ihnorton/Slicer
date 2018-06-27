@@ -1,11 +1,15 @@
+from __future__ import division
+from __future__ import absolute_import
+from builtins import range
+from past.utils import old_div
 import os
 import vtk
 import vtkITK
 import ctk
 import qt
 import slicer
-from EditOptions import HelpButton
-import LabelEffect
+from .EditOptions import HelpButton
+from . import LabelEffect
 
 __all__ = [
   'LevelTracingEffectOptions',
@@ -116,7 +120,7 @@ class LevelTracingEffectTool(LabelEffect.LabelEffectTool):
     self.mapper = vtk.vtkPolyDataMapper2D()
     self.actor = vtk.vtkActor2D()
     property_ = self.actor.GetProperty()
-    property_.SetColor( 107/255., 190/255., 99/255. )
+    property_.SetColor( old_div(107,255.), old_div(190,255.), old_div(99,255.) )
     property_.SetLineWidth( 1 )
     self.mapper.SetInputData(self.polyData)
     self.actor.SetMapper(self.mapper)
@@ -165,7 +169,7 @@ class LevelTracingEffectTool(LabelEffect.LabelEffectTool):
     backgroundImage = self.editUtil.getBackgroundImage()
     ijk = self.logic.backgroundXYToIJK( xy )
     dimensions = backgroundImage.GetDimensions()
-    for index in xrange(3):
+    for index in range(3):
       # tracingFilter crashes if it receives a seed point at the edge of the image,
       # so only accept the point if it is inside the image and is at least one pixel away from the edge
       if ijk[index] < 1 or ijk[index] >= dimensions[index]-1:

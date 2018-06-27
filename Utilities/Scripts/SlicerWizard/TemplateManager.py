@@ -1,3 +1,4 @@
+from builtins import object
 import fnmatch
 import logging
 import os
@@ -278,7 +279,7 @@ class TemplateManager(object):
     if category is None:
       result = {}
       for c in _templateCategories:
-        result[c] = self._paths[c].keys()
+        result[c] = list(self._paths[c].keys())
       return result
 
     else:

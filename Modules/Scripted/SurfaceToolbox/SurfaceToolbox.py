@@ -1,3 +1,7 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import os
 import unittest
 import string
@@ -268,7 +272,7 @@ class SurfaceToolboxWidget(ScriptedLoadableModuleWidget):
       def callback(*args):
         current_locals = scope_locals.copy()
         current_locals.update({'args':args})
-        exec cmd in globals(), current_locals
+        exec(cmd, globals(), current_locals)
         updateGUI()
       obj.connect(evt,callback)
 
@@ -542,7 +546,7 @@ class SurfaceToolboxTest(ScriptedLoadableModuleTest):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=5767', 'FA.nrrd', slicer.util.loadVolume),
         )
@@ -551,7 +555,7 @@ class SurfaceToolboxTest(ScriptedLoadableModuleTest):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)

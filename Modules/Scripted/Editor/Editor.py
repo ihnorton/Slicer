@@ -1,3 +1,4 @@
+from builtins import range
 import os
 import slicer
 import qt, ctk, vtk
@@ -76,7 +77,7 @@ class EditorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     layoutManager = slicer.app.layoutManager()
     if layoutManager is not None:
       sliceLogics = layoutManager.mrmlSliceLogics()
-      for i in xrange(sliceLogics.GetNumberOfItems()):
+      for i in range(sliceLogics.GetNumberOfItems()):
         sliceLogic = sliceLogics.GetItemAsObject(i)
         if sliceLogic:
           sliceNode = sliceLogic.GetSliceNode()

@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+from builtins import str
 import os
 import vtk
 import qt
 import ctk
 import slicer
-import Effect
+from . import Effect
 
 __all__ = [
   'IslandEffectOptions',

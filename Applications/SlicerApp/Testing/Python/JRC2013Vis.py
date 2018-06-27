@@ -1,3 +1,9 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -7,7 +13,7 @@ from DICOMLib import DICOMUtils
 # JRC2013Vis
 #
 
-class JRC2013Vis:
+class JRC2013Vis(object):
   def __init__(self, parent):
     parent.title = "JRC2013Vis" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -38,7 +44,7 @@ class JRC2013Vis:
 # qJRC2013VisWidget
 #
 
-class JRC2013VisWidget:
+class JRC2013VisWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -137,7 +143,7 @@ class JRC2013VisWidget:
       processCurrentPath = dicomFilesDirectory + '/Dcmtk-db/'
 
       if slicer.util.confirmYesNoDisplay('Do you want to choose local DCMTK database folder?'):
-        print 'Yes'
+        print('Yes')
         dicomFilesDirectory = qt.QFileDialog.getExistingDirectory(None, 'Select DCMTK database folder')
         configFilePath = dicomFilesDirectory + '/dcmqrscp.cfg'
         processCurrentPath = dicomFilesDirectory
@@ -145,17 +151,17 @@ class JRC2013VisWidget:
         downloads = (
           ('http://slicer.kitware.com/midas3/download?items=18822', 'Dcmtk-db.zip'),
           )
-        print 'Downloading'
+        print('Downloading')
 
-        import urllib
+        import urllib.request, urllib.parse, urllib.error
         for url,name in downloads:
           filePath = slicer.app.temporaryPath + '/' + name
           if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
-            print 'Requesting download %s from %s...\n' % (name, url)
-            urllib.urlretrieve(url, filePath)
-        print 'Finished with download'
+            print('Requesting download %s from %s...\n' % (name, url))
+            urllib.request.urlretrieve(url, filePath)
+        print('Finished with download')
 
-        print 'Unzipping'
+        print('Unzipping')
         qt.QDir().mkpath(dicomFilesDirectory)
         slicer.app.applicationLogic().Unzip(filePath, dicomFilesDirectory)
 
@@ -177,21 +183,21 @@ class JRC2013VisWidget:
           dcmqrscpExePath = testPath
           break
       if not dcmqrscpExePath:
-        raise( UserWarning("Could not find dcmqrscp executable") )
+        raise UserWarning
 
       args = (dcmqrscpExePath, '-c', configFilePath)
-      print 'Start DICOM peer'
+      print('Start DICOM peer')
       self.popen = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=processCurrentPath)
       self.startStopDicomPeerButton.setEnabled(True)
     else:
-      print 'Stop DICOM peer'
+      print('Stop DICOM peer')
       self.popen.kill()
 
 #
 # JRC2013VisLogic
 #
 
-class JRC2013VisLogic:
+class JRC2013VisLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -266,7 +272,7 @@ class JRC2013VisTest(unittest.TestCase):
     #
     # first, get the data - a zip file of dicom data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=18822', 'Dcmtk-db.zip'),
         )
@@ -276,7 +282,7 @@ class JRC2013VisTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         self.delayDisplay('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
     self.delayDisplay('Finished with download\n')
 
     self.delayDisplay("Unzipping")
@@ -311,7 +317,7 @@ class JRC2013VisTest(unittest.TestCase):
           dcmqrscpExePath = testPath
           break
       if not dcmqrscpExePath:
-        raise( UserWarning("Could not find dcmqrscp executable") )
+        raise UserWarning
 
       args = (dcmqrscpExePath, '-c', configFilePath)
       popen = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=processCurrentPath)
@@ -386,7 +392,7 @@ class JRC2013VisTest(unittest.TestCase):
       slicer.util.clickAndDrag(threeDView,button='Right')
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -401,7 +407,7 @@ class JRC2013VisTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=8609', '3DHeadData.mrb', slicer.util.loadScene),
         )
@@ -410,7 +416,7 @@ class JRC2013VisTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -431,7 +437,7 @@ class JRC2013VisTest(unittest.TestCase):
       redWidget.sliceController().setSliceVisible(True);
 
       self.delayDisplay('Scroll Slices')
-      for offset in xrange(-20,20,2):
+      for offset in range(-20,20,2):
         redController.setSliceOffsetValue(offset)
 
       self.delayDisplay('Skin Opacity')
@@ -455,7 +461,7 @@ class JRC2013VisTest(unittest.TestCase):
 
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
       cameraNode.GetCamera().Azimuth(90)
@@ -469,7 +475,7 @@ class JRC2013VisTest(unittest.TestCase):
       slicer.util.clickAndDrag(threeDView,button='Right')
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -482,7 +488,7 @@ class JRC2013VisTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=8611', 'LiverData.mrb', slicer.util.loadScene),
         )
@@ -491,7 +497,7 @@ class JRC2013VisTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -506,7 +512,7 @@ class JRC2013VisTest(unittest.TestCase):
       redController = redWidget.sliceController()
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
 
@@ -531,7 +537,7 @@ class JRC2013VisTest(unittest.TestCase):
 
       self.delayDisplay('Middle Hepatic')
       models = slicer.util.getNodes('vtkMRMLModelNode*')
-      for modelNode in models.values():
+      for modelNode in list(models.values()):
         modelNode.GetDisplayNode().SetVisibility(0)
 
       segmentVII = slicer.util.getNode('LiverSegment_II')
@@ -545,7 +551,7 @@ class JRC2013VisTest(unittest.TestCase):
       cameraNode.GetCamera().Elevation(-20)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -558,7 +564,7 @@ class JRC2013VisTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=8612', 'LungData.mrb', slicer.util.loadScene),
         )
@@ -567,7 +573,7 @@ class JRC2013VisTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -582,7 +588,7 @@ class JRC2013VisTest(unittest.TestCase):
       redController = redWidget.sliceController()
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
 
@@ -621,7 +627,7 @@ class JRC2013VisTest(unittest.TestCase):
             displayNode.SetVisibility(1 if node == showNode else 0)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))

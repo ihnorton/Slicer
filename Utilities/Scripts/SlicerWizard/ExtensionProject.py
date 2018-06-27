@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import re
 
@@ -204,7 +207,7 @@ class ExtensionProject(object):
       except EOFError:
         pass
 
-      for name in prefinedVariables.keys():
+      for name in list(prefinedVariables.keys()):
         try:
           text = text.replace("${%s}" % name, prefinedVariables[name])
         except KeyError:
@@ -334,7 +337,7 @@ class ExtensionProject(object):
     indent = ""
     after = -1
 
-    for n in xrange(len(self._scriptContents.tokens)):
+    for n in range(len(self._scriptContents.tokens)):
       t = self._scriptContents.tokens[n]
 
       if isinstance(t, CMakeParser.Comment) and \
@@ -401,4 +404,4 @@ class ExtensionProject(object):
     else:
       # Otherwise, write the file using full encoding conversion
       with open(destination, "w") as fp:
-        fp.write(unicode(self._scriptContents).encode(encoding))
+        fp.write(str(self._scriptContents).encode(encoding))

@@ -1,3 +1,8 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +11,7 @@ import vtk, qt, ctk, slicer
 # sceneImport2428
 #
 
-class sceneImport2428:
+class sceneImport2428(object):
   def __init__(self, parent):
     parent.title = "Scene Import (Issue 2428)" # make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -38,7 +43,7 @@ class sceneImport2428:
 # qsceneImport2428Widget
 #
 
-class sceneImport2428Widget:
+class sceneImport2428Widget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -100,7 +105,7 @@ class sceneImport2428Widget:
     self.helloWorldButton = helloWorldButton
 
   def onHelloWorldButtonClicked(self):
-    print "Hello World !"
+    print("Hello World !")
 
   def onReload(self,moduleName="sceneImport2428"):
     """Generic reload method for any scripted module.
@@ -121,7 +126,7 @@ class sceneImport2428Widget:
 # sceneImport2428Logic
 #
 
-class sceneImport2428Logic:
+class sceneImport2428Logic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -225,12 +230,12 @@ class sceneImport2428Test(unittest.TestCase):
     self.delayDisplay('Paint radius is %s' % parameterNode.GetParameter('PaintEffect,radius'))
     sliceWidget = lm.sliceWidget('Red')
     size = min(sliceWidget.width,sliceWidget.height)
-    step = size / 12
-    center = size / 2
+    step = old_div(size, 12)
+    center = old_div(size, 2)
     parameterNode.SetParameter('PaintEffect,radius', '20')
     paintTool = EditorLib.PaintEffectTool(sliceWidget)
     self.delayDisplay('Paint radius is %s, tool radius is %d' % (parameterNode.GetParameter('PaintEffect,radius'),paintTool.radius))
-    for label in xrange(1,5):
+    for label in range(1,5):
       editUtil.setLabel(label)
       pos = center - 2*step + (step * label)
       self.delayDisplay('Painting %d, at  (%d,%d)' % (label,pos,pos),200)
@@ -308,15 +313,15 @@ verifyModels()
     fileNamesInScene = []
     success = True
     numModels = slicer.mrmlScene.GetNumberOfNodesByClass( "vtkMRMLModelNode" )
-    for n in xrange(numModels):
+    for n in range(numModels):
       modelNode = slicer.mrmlScene.GetNthNodeByClass( n, "vtkMRMLModelNode" )
       polyDataInScene.append(modelNode.GetPolyData())
-      for dn in xrange(modelNode.GetNumberOfDisplayNodes()):
+      for dn in range(modelNode.GetNumberOfDisplayNodes()):
         displayNode = modelNode.GetNthDisplayNode(dn)
         if modelNode.GetPolyData() != displayNode.GetInputPolyData():
           self.delayDisplay("Model %d does not match its display node %d! (name: %s, ids: %s and %s)" % (n,dn,modelNode.GetName(), modelNode.GetID(),displayNode.GetID()))
           success = False
-      for sn in xrange(modelNode.GetNumberOfStorageNodes()):
+      for sn in range(modelNode.GetNumberOfStorageNodes()):
         storageNode = modelNode.GetNthStorageNode(sn)
         fileName = storageNode.GetFileName()
         fileNamesInScene.append(fileName)
@@ -328,7 +333,7 @@ verifyModels()
     #
     # now check that each model has a unique polydata
     #
-    for n in xrange(numModels):
+    for n in range(numModels):
       modelNode = slicer.mrmlScene.GetNthNodeByClass( n, "vtkMRMLModelNode" )
       if polyDataInScene.count(modelNode.GetPolyData()) > 1:
         self.delayDisplay("Polydata for Model is duplicated! (id: %s and %s)" % (n,modelNode.GetID()))

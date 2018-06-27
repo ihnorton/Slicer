@@ -1,3 +1,5 @@
+from builtins import zip
+from builtins import range
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -75,7 +77,7 @@ class SlicerBoundsTestTest(ScriptedLoadableModuleTest):
     sampleDataLogic = SampleData.SampleDataLogic()
     volumeNode = sampleDataLogic.downloadAbdominalCTVolume()
 
-    bounds = range(6)
+    bounds = list(range(6))
     volumeNode.GetRASBounds(bounds)
     untransformedBounds = [-165.68283081054688, 161.62185668945312, 7.542130470275879, 245.78431797027588, -347.62799072265625, -25.12799072265625]
     self.assertListAlmostEquals(bounds, untransformedBounds)
@@ -123,7 +125,7 @@ class SlicerBoundsTestTest(ScriptedLoadableModuleTest):
     modelNode.SetPolyDataConnection(applyTransform.GetOutputPort())
 
     # Testing
-    bounds = range(6)
+    bounds = list(range(6))
     modelNode.GetRASBounds(bounds)
     untransformedBounds = [-64.5710220336914, 235.01434326171875, -302.91339111328125, 287.3067932128906, -214.92703247070312, 212.1946258544922]
     self.assertListAlmostEquals(bounds, untransformedBounds)
@@ -174,7 +176,7 @@ class SlicerBoundsTestTest(ScriptedLoadableModuleTest):
     segmentationLogic.ImportModelToSegmentationNode(modelNode, segmentationNode)
 
     # Testing
-    bounds = range(6)
+    bounds = list(range(6))
     segmentationNode.GetRASBounds(bounds)
     untransformedBounds = [-65.0710220336914, 235.9289779663086, -304.413391113281, 288.586608886719, -216.427032470703, 213.572967529297]
     self.assertListAlmostEquals(bounds, untransformedBounds)
@@ -210,7 +212,7 @@ class SlicerBoundsTestTest(ScriptedLoadableModuleTest):
     markupNode.AddFiducial(-200.0, 500.0, -0.23)
     markupNode.AddFiducial(1.0, 1003.01, 0.0)
 
-    bounds = range(6)
+    bounds = list(range(6))
     markupNode.GetRASBounds(bounds)
     untransformedBounds = [-200, 1.0, -90, 1003.01, -180.0, 0.0]
     self.assertListAlmostEquals(bounds, untransformedBounds)
@@ -242,7 +244,7 @@ class SlicerBoundsTestTest(ScriptedLoadableModuleTest):
     roiNode.SetXYZ(100, 300, -0.689)
     roiNode.SetRadiusXYZ(700, 8, 45)
 
-    bounds = range(6)
+    bounds = list(range(6))
     roiNode.GetRASBounds(bounds)
     untransformedBounds = [-600, 800, 292, 308, -45.689, 44.311]
     self.assertListAlmostEquals(bounds, untransformedBounds)

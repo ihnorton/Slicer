@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import qt, ctk
 
 import SlicerWizard.TemplateManager
@@ -57,7 +59,7 @@ class SettingsPanel(ctk.ctkSettingsPanel):
       "directoryList", str(qt.SIGNAL("directoryListChanged()")),
       "Additional template paths", ctk.ctkSettingsPanel.OptionRequireRestart)
 
-    for category in self.ui.paths.keys():
+    for category in list(self.ui.paths.keys()):
       self.registerProperty(
         userTemplatePathKey(category), self.ui.paths[category].ui.pathList,
         "directoryList", str(qt.SIGNAL("directoryListChanged()")),

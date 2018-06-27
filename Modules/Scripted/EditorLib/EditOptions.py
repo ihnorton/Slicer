@@ -1,9 +1,12 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import object
 import slicer
 import qt
 import ctk
 import vtk
 from slicer.util import getNodes
-from EditUtil import EditUtil
+from .EditUtil import EditUtil
 from slicer.util import VTKObservationMixin
 
 __all__ = ['HelpButton', 'EditOptions']

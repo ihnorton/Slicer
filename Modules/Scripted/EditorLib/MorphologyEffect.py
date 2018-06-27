@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import os
 import vtk
 import qt
 import ctk
 import slicer
-import Effect
+from . import Effect
 
 __all__ = [
   'MorphologyEffectOptions',

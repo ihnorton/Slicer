@@ -1,4 +1,6 @@
+from __future__ import print_function
 
+from builtins import object
 import os
 import unittest
 import vtk
@@ -241,7 +243,7 @@ execfile('/Users/pieper/slicer4/latest/Slicer/Applications/SlicerApp/Testing/Pyt
 # SlicerMRBMultipleSaveRestoreTest
 #
 
-class SlicerMRBMultipleSaveRestoreTest:
+class SlicerMRBMultipleSaveRestoreTest(object):
   """
   This class is the 'hook' for slicer to detect and recognize the test
   as a loadable scripted module (with a hidden interface)
@@ -282,7 +284,7 @@ class SlicerMRBMultipleSaveRestoreTest:
 # SlicerMRBMultipleSaveRestoreTestWidget
 #
 
-class SlicerMRBMultipleSaveRestoreTestWidget:
+class SlicerMRBMultipleSaveRestoreTestWidget(object):
   def __init__(self, parent = None):
     self.parent = parent
 

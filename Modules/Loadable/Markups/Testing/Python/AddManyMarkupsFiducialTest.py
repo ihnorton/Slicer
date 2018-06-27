@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import time
 import unittest
@@ -7,7 +11,7 @@ import vtk, qt, ctk, slicer
 # AddManyMarkupsFiducialTest
 #
 
-class AddManyMarkupsFiducialTest:
+class AddManyMarkupsFiducialTest(object):
   def __init__(self, parent):
     parent.title = "AddManyMarkupsFiducialTest"
     parent.categories = ["Testing.TestCases"]
@@ -38,7 +42,7 @@ class AddManyMarkupsFiducialTest:
 # qAddManyMarkupsFiducialTestWidget
 #
 
-class AddManyMarkupsFiducialTestWidget:
+class AddManyMarkupsFiducialTestWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -144,7 +148,7 @@ class AddManyMarkupsFiducialTestWidget:
       evalString = 'globals()["%s"].%sTest()' % (moduleName, moduleName)
       tester = eval(evalString)
       tester.runTest()
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       slicer.util.warningDisplay('Exception!\n\n' + str(e) + "\n\nSee Python Console for Stack Trace",
@@ -155,7 +159,7 @@ class AddManyMarkupsFiducialTestWidget:
 # AddManyMarkupsFiducialTestLogic
 #
 
-class AddManyMarkupsFiducialTestLogic:
+class AddManyMarkupsFiducialTestLogic(object):
 
   def __init__(self):
     pass
@@ -166,7 +170,7 @@ class AddManyMarkupsFiducialTestLogic:
     """
     print('Running test to add %s fidicuals' % (numToAdd,))
     print('Index\tTime to add fid\tDelta between adds')
-    print "%(index)04s\t" % {'index': "i"}, "t\tdt'"
+    print("%(index)04s\t" % {'index': "i"}, "t\tdt'")
     r = rOffset
     a = 0
     s = 0
@@ -185,7 +189,7 @@ class AddManyMarkupsFiducialTestLogic:
     fidNode.SetAndObserveDisplayNodeID(displayNode.GetID())
 
     if usefewerModifyCalls == 1:
-      print "Start modify"
+      print("Start modify")
       mod = fidNode.StartModify()
 
     # iterate over the number of fiducials to add
@@ -196,7 +200,7 @@ class AddManyMarkupsFiducialTestLogic:
       t2 = time.clock()
       timeToAddThisFid = t2 - t1
       dt = timeToAddThisFid - timeToAddLastFid
-      print '%(index)04d\t' % {'index': i}, timeToAddThisFid, "\t", dt
+      print('%(index)04d\t' % {'index': i}, timeToAddThisFid, "\t", dt)
       r = r + 1.0
       a = a + 1.0
       s = s + 1.0
@@ -207,7 +211,7 @@ class AddManyMarkupsFiducialTestLogic:
 
     testEndTime = time.clock()
     testTime = testEndTime - testStartTime
-    print "Total time to add ",numToAdd," = ", testTime
+    print("Total time to add ",numToAdd," = ", testTime)
 
     return True
 

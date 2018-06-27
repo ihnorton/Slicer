@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import object
 import os, zipfile, tempfile
 import vtk, qt, ctk, slicer
 from DICOMLib import DICOMPlugin
@@ -120,7 +122,7 @@ class DICOMSlicerDataBundlePluginClass(DICOMPlugin):
 # DICOMSlicerDataBundlePlugin
 #
 
-class DICOMSlicerDataBundlePlugin:
+class DICOMSlicerDataBundlePlugin(object):
   """
   This class is the 'hook' for slicer to detect and recognize the plugin
   as a loadable scripted module
@@ -156,7 +158,7 @@ class DICOMSlicerDataBundlePlugin:
 # DICOMSlicerDataBundleWidget
 #
 
-class DICOMSlicerDataBundleWidget:
+class DICOMSlicerDataBundleWidget(object):
   def __init__(self, parent = None):
     self.parent = parent
 

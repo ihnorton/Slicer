@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 import os
 import vtk, qt, ctk, slicer, logging
 
@@ -5,7 +8,7 @@ import vtk, qt, ctk, slicer, logging
 # Abstract class of python scripted segment editor effects
 #
 
-class AbstractScriptedSegmentEditorEffect():
+class AbstractScriptedSegmentEditorEffect(object):
   """ Abstract scripted segment editor effects for effects implemented in python
 
       USAGE:
@@ -88,7 +91,7 @@ class AbstractScriptedSegmentEditorEffect():
       return
     import math
     spinbox.unitAwareProperties &= ~(slicer.qMRMLSpinBox.MinimumValue | slicer.qMRMLSpinBox.MaximumValue | slicer.qMRMLSpinBox.Precision)
-    stepSize = 10**(math.floor(math.log10(min(imageData.GetSpacing())/10.0)))
+    stepSize = 10**(math.floor(math.log10(old_div(min(imageData.GetSpacing()),10.0))))
     spinbox.minimum = stepSize
     spinbox.maximum = 10**(math.ceil(math.log10(max(imageData.GetSpacing())*100.0)))
     spinbox.singleStep = stepSize

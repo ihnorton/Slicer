@@ -1,3 +1,12 @@
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+from past.builtins import basestring
+from past.utils import old_div
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -67,7 +76,7 @@ use it for commercial purposes.</p>
 #
 # SampleDataSource
 #
-class SampleDataSource:
+class SampleDataSource(object):
   """Can be a passed a simple strings
   or lists as used in the logic below.
   e.g.
@@ -123,9 +132,9 @@ class SampleDataWidget(ScriptedLoadableModuleWidget):
     iconPath = os.path.join(os.path.dirname(__file__).replace('\\','/'), 'Resources','Icons')
     desktop = qt.QDesktopWidget()
     mainScreenSize = desktop.availableGeometry(desktop.primaryScreen)
-    iconSize = qt.QSize(mainScreenSize.width()/15,mainScreenSize.height()/10)
+    iconSize = qt.QSize(old_div(mainScreenSize.width(),15),old_div(mainScreenSize.height(),10))
 
-    categories = slicer.modules.sampleDataSources.keys()
+    categories = list(slicer.modules.sampleDataSources.keys())
     categories.sort()
     if self.logic.builtInCategoryName in categories:
       categories.remove(self.logic.builtInCategoryName)
@@ -212,7 +221,7 @@ class SampleDataWidget(ScriptedLoadableModuleWidget):
 # SampleData logic
 #
 
-class SampleDataLogic:
+class SampleDataLogic(object):
   """Manage the slicer.modules.sampleDataSources dictionary.
   The dictionary keys are categories of sample data sources.
   The BuiltIn category is managed here.  Modules or extensions can
@@ -244,7 +253,7 @@ class SampleDataLogic:
     except AttributeError:
       slicer.modules.sampleDataSources = {}
 
-    if not slicer.modules.sampleDataSources.has_key(category):
+    if category not in slicer.modules.sampleDataSources:
       slicer.modules.sampleDataSources[category] = []
 
     slicer.modules.sampleDataSources[category].append(SampleDataSource(
@@ -298,7 +307,7 @@ class SampleDataLogic:
           ('CTBrain', 'MRBrainT1', 'MRBrainT2')),
         )
 
-    if not slicer.modules.sampleDataSources.has_key(self.builtInCategoryName):
+    if self.builtInCategoryName not in slicer.modules.sampleDataSources:
       slicer.modules.sampleDataSources[self.builtInCategoryName] = []
     for sourceArgument in sourceArguments:
       slicer.modules.sampleDataSources[self.builtInCategoryName].append(SampleDataSource(*sourceArgument))
@@ -354,7 +363,7 @@ class SampleDataLogic:
   def sourceForSampleName(self,sampleName):
     """For a given sample name this will search the available sources.
     Returns SampleDataSource instance."""
-    for category in slicer.modules.sampleDataSources.keys():
+    for category in list(slicer.modules.sampleDataSources.keys()):
       for source in slicer.modules.sampleDataSources[category]:
         if sampleName == source.sampleName:
           return source
@@ -421,7 +430,7 @@ class SampleDataLogic:
 
   def reportHook(self,blocksSoFar,blockSize,totalSize):
     # we clamp to 100% because the blockSize might be larger than the file itself
-    percent = min(int((100. * blocksSoFar * blockSize) / totalSize), 100)
+    percent = min(int(old_div((100. * blocksSoFar * blockSize), totalSize)), 100)
     if percent == 100 or (percent - self.downloadPercent >= 10):
       # we clamp to totalSize when blockSize is larger than totalSize
       humanSizeSoFar = self.humanFormatSize(min(blocksSoFar * blockSize, totalSize))
@@ -432,12 +441,12 @@ class SampleDataLogic:
   def downloadFile(self, uri, destFolderPath, name):
     filePath = destFolderPath + '/' + name
     if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
-      import urllib
+      import urllib.request, urllib.parse, urllib.error
       self.logMessage('<b>Requesting download</b> <i>%s</i> from %s...' % (name, uri))
       # add a progress bar
       self.downloadPercent = 0
       try:
-        urllib.urlretrieve(uri, filePath, self.reportHook)
+        urllib.request.urlretrieve(uri, filePath, self.reportHook)
         self.logMessage('<b>Download finished</b>')
       except IOError as e:
         self.logMessage('<b>\tDownload failed: %s</b>' % e, logging.ERROR)

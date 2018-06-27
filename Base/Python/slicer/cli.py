@@ -1,5 +1,8 @@
 """ This module is a place holder for convenient functions allowing to interact with CLI."""
+from __future__ import print_function
 
+from builtins import str
+from past.builtins import basestring
 def createNode(cliModule, parameters = None):
   """Creates a new vtkMRMLCommandLineModuleNode for a specific module, with
   optional parameters"""
@@ -7,7 +10,7 @@ def createNode(cliModule, parameters = None):
     return None
   cliLogic = cliModule.logic()
   if not cliLogic:
-    print "Could not find logic for module '%s'" % cliModule.name
+    print("Could not find logic for module '%s'" % cliModule.name)
     return None
   node = cliLogic.CreateNodeInScene()
   setNodeParameters(node, parameters)
@@ -26,7 +29,7 @@ def setNodeParameters(node, parameters):
     return None
   if not parameters:
     return None
-  for key, value in parameters.iteritems():
+  for key, value in parameters.items():
     if isinstance(value, basestring):
       node.SetParameterAsString(key, value)
     elif isinstance(value, bool):
@@ -43,7 +46,7 @@ def setNodeParameters(node, parameters):
       node.SetParameterAsString(key, commaSeparatedString)
     #TODO: file support
     else:
-      print "parameter ", key, " has unsupported type ", value.__class__.__name__
+      print("parameter ", key, " has unsupported type ", value.__class__.__name__)
 
 def runSync(module, node=None, parameters=None, delete_temporary_files=True, update_display=True):
   """Run a CLI synchronously, optionally given a node with optional parameters,
@@ -89,4 +92,4 @@ def run(module, node = None, parameters = None, wait_for_completion = False, del
   return node
 
 def cancel(node):
-  print "Not yet implemented"
+  print("Not yet implemented")

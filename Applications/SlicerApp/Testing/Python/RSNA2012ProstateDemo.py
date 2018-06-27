@@ -1,3 +1,8 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +11,7 @@ import vtk, qt, ctk, slicer
 # RSNA2012ProstateDemo
 #
 
-class RSNA2012ProstateDemo:
+class RSNA2012ProstateDemo(object):
   def __init__(self, parent):
     parent.title = "RSNA2012ProstateDemo" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -37,7 +42,7 @@ class RSNA2012ProstateDemo:
 # qRSNA2012ProstateDemoWidget
 #
 
-class RSNA2012ProstateDemoWidget:
+class RSNA2012ProstateDemoWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -89,7 +94,7 @@ class RSNA2012ProstateDemoWidget:
 # RSNA2012ProstateDemoLogic
 #
 
-class RSNA2012ProstateDemoLogic:
+class RSNA2012ProstateDemoLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -150,14 +155,14 @@ class RSNA2012ProstateDemoTest(unittest.TestCase):
 
     print("Running RSNA2012ProstateDemo Test case:")
 
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 
     # perform the downloads if needed, then load
     filePath = slicer.app.temporaryPath + '/RSNA2012ProstateDemo.mrb'
     urlPath = 'http://slicer.kitware.com/midas3/download?items=10697'
     if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
       self.delayDisplay('Downloading MRB from %s to %s...\n' % (urlPath, filePath))
-      urllib.urlretrieve(urlPath, filePath)
+      urllib.request.urlretrieve(urlPath, filePath)
     else:
       self.delayDisplay('Using existing %s...\n' % filePath)
     slicer.mrmlScene.Clear(0)
@@ -171,7 +176,7 @@ class RSNA2012ProstateDemoTest(unittest.TestCase):
     svns = slicer.util.getNodes('vtkMRMLSceneViewNode*')
 
     for reps in range(5):
-      for svname,svnode in svns.items():
+      for svname,svnode in list(svns.items()):
         self.delayDisplay('Restoring scene view %s ...' % svname )
         svnode.RestoreScene()
         self.delayDisplay('OK')

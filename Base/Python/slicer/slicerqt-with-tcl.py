@@ -3,6 +3,7 @@
 # This script should be sourced after slicerqt.py
 #
 
+from builtins import object
 def tcl(cmd):
   global _tpycl
   try:

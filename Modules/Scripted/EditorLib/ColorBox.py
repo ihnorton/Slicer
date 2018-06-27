@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import qt
 import slicer
@@ -116,7 +119,7 @@ class ColorBox(object):
       self.model.setItem(self.row,2,item)
       self.items.append(item)
       self.row+=1
-    for c in xrange(self.colorNode.GetNumberOfColors()):
+    for c in range(self.colorNode.GetNumberOfColors()):
       name = self.colorNode.GetColorName(c)
       if name != "(none)" and name.lower().find(pattern.lower()) >= 0:
         self.addRow(c)

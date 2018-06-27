@@ -1,3 +1,9 @@
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -549,7 +555,7 @@ class ScreenCaptureWidget(ScriptedLoadableModuleWidget):
 
       import shutil
 
-      fps = numberOfSteps / self.videoLengthSliderWidget.value
+      fps = old_div(numberOfSteps, self.videoLengthSliderWidget.value)
 
       if numberOfSteps > 1:
         forwardBackward = self.forwardBackwardCheckBox.checked
@@ -558,7 +564,7 @@ class ScreenCaptureWidget(ScriptedLoadableModuleWidget):
         fileIndex = numberOfSteps
         for repeatIndex in range(numberOfRepeats):
           if forwardBackward:
-            for step in reversed(xrange(1, numberOfSteps-1)):
+            for step in reversed(range(1, numberOfSteps-1)):
               sourceFilename = filePathPattern % step
               destinationFilename = filePathPattern % fileIndex
               self.logic.addLog("Copy to "+destinationFilename)
@@ -731,9 +737,9 @@ class ScreenCaptureLogic(ScriptedLoadableModuleLogic):
       success = True
       try:
         logging.info('Requesting download ffmpeg from %s...' % url)
-        import urllib2
-        req = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
-        data = urllib2.urlopen(req).read()
+        import urllib.request, urllib.error, urllib.parse
+        req = urllib.request.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
+        data = urllib.request.urlopen(req).read()
         with open(filePath, "wb") as f:
           f.write(data)
 
@@ -895,7 +901,7 @@ class ScreenCaptureLogic(ScriptedLoadableModuleLogic):
 
     sliceView = self.viewFromNode(sliceNode)
     compositeNode = sliceLogic.GetSliceCompositeNode()
-    offsetStepSize = (endSliceOffset-startSliceOffset)/(numberOfImages-1)
+    offsetStepSize = old_div((endSliceOffset-startSliceOffset),(numberOfImages-1))
     for offsetIndex in range(numberOfImages):
       filename = filePathPattern % offsetIndex
       self.addLog("Write "+filename)
@@ -926,7 +932,7 @@ class ScreenCaptureLogic(ScriptedLoadableModuleLogic):
     originalForegroundOpacity = compositeNode.GetForegroundOpacity()
     startForegroundOpacity = 0.0
     endForegroundOpacity = 1.0
-    opacityStepSize = (endForegroundOpacity - startForegroundOpacity) / (numberOfImages - 1)
+    opacityStepSize = old_div((endForegroundOpacity - startForegroundOpacity), (numberOfImages - 1))
     for offsetIndex in range(numberOfImages):
       filename = filePathPattern % offsetIndex
       self.addLog("Write "+filename)
@@ -966,7 +972,7 @@ class ScreenCaptureLogic(ScriptedLoadableModuleLogic):
       renderView.pitch()
 
     # Rotate step-by-step
-    rotationStepSize = (endRotation - startRotation) / (numberOfImages - 1)
+    rotationStepSize = old_div((endRotation - startRotation), (numberOfImages - 1))
     renderView.setPitchRollYawIncrement(rotationStepSize)
     if rotationAxis == AXIS_YAW:
       renderView.yawDirection = renderView.YawLeft
@@ -1016,7 +1022,7 @@ class ScreenCaptureLogic(ScriptedLoadableModuleLogic):
     originalSelectedItemNumber = sequenceBrowserNode.GetSelectedItemNumber()
 
     renderView = self.viewFromNode(viewNode)
-    stepSize = (sequenceEndIndex - sequenceStartIndex) / (numberOfImages - 1)
+    stepSize = old_div((sequenceEndIndex - sequenceStartIndex), (numberOfImages - 1))
     for offsetIndex in range(numberOfImages):
       sequenceBrowserNode.SetSelectedItemNumber(int(sequenceStartIndex+offsetIndex*stepSize))
       filename = filePathPattern % offsetIndex
@@ -1047,7 +1053,7 @@ class ScreenCaptureLogic(ScriptedLoadableModuleLogic):
                     "-r", str(frameRate),
                     "-start_number", "0",
                     "-i", str(filePathPattern)]
-    ffmpegParams += filter(None, extraOptions.split(' '))
+    ffmpegParams += [_f for _f in extraOptions.split(' ') if _f]
     ffmpegParams.append(outputVideoFilePath)
 
     self.addLog("Start ffmpeg:\n"+' '.join(ffmpegParams))

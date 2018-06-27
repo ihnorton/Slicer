@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+from builtins import str
 import slicer
 import qt
 import vtk
 # from ctk import ctkCollapsibleButton
-import ColorBox
-from EditUtil import EditUtil
+from . import ColorBox
+from .EditUtil import EditUtil
 from slicer.util import VTKObservationMixin
 
 __all__ = ['EditColor']

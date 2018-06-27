@@ -1,3 +1,4 @@
+from builtins import range
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -268,7 +269,7 @@ class SlicerTransformInteractionTest1Test(ScriptedLoadableModuleTest):
     defaultPlusMovePlusRotationPlusScalingTransform = []
     for i in range(4):
       defaultPlusMovePlusRotationPlusScalingTransform.append(
-        map(lambda x: x*scale[i], defaultPlusMovePlusRotationTransform[i]))
+        [x*scale[i] for x in defaultPlusMovePlusRotationTransform[i]])
 
     representation.GetTransform(transform)
     self.assertTransform(transform, defaultPlusMovePlusRotationPlusScalingTransform)
@@ -277,7 +278,7 @@ class SlicerTransformInteractionTest1Test(ScriptedLoadableModuleTest):
     volumePlusMovePlusRotationPlusScalingTransform = []
     for i in range(4):
       volumePlusMovePlusRotationPlusScalingTransform.append(
-        map(lambda x: x*scale[i], volumePlusMovePlusRotationTransform[i]))
+        [x*scale[i] for x in volumePlusMovePlusRotationTransform[i]])
 
     volume.SetAndObserveTransformNodeID(tNode.GetID())
     tdNode.UpdateEditorBounds()

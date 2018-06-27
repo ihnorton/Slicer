@@ -1,3 +1,10 @@
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import os
 import unittest
 import qt, vtk, ctk
@@ -9,7 +16,7 @@ import DataProbeLib
 # DataProbe
 #
 
-class DataProbe:
+class DataProbe(object):
   def __init__(self, parent):
     import string
     parent.title = "DataProbe"
@@ -110,7 +117,7 @@ class DataProbeInfoWidget(object):
     if not nameSize:
       nameSize = self.nameSize
     if len(name) > nameSize:
-      preSize = nameSize / 2
+      preSize = old_div(nameSize, 2)
       postSize = preSize - 3
       name = name[:preSize] + "..." + name[-postSize:]
     return name
@@ -133,7 +140,7 @@ class DataProbeInfoWidget(object):
     if not imageData:
       return "No Image"
     dims = imageData.GetDimensions()
-    for ele in xrange(3):
+    for ele in range(3):
       if ijk[ele] < 0 or ijk[ele] >= dims[ele]:
         return "Out of Frame"
     pixel = ""
@@ -178,7 +185,7 @@ class DataProbeInfoWidget(object):
     numberOfComponents = imageData.GetNumberOfScalarComponents()
     if numberOfComponents > 3:
       return "%d components" % numberOfComponents
-    for c in xrange(numberOfComponents):
+    for c in range(numberOfComponents):
       component = imageData.GetScalarComponentAsDouble(ijk[0],ijk[1],ijk[2],c)
       if component.is_integer():
         component = int(component)
@@ -265,7 +272,7 @@ class DataProbeInfoWidget(object):
       sliceView = slicer.app.layoutManager().sliceWidget(sliceNode.GetLayoutName()).sliceView()
       sliceView.getDisplayableManagers(displayableManagerCollection)
     aggregatedDisplayableManagerInfo = ''
-    for index in xrange(displayableManagerCollection.GetNumberOfItems()):
+    for index in range(displayableManagerCollection.GetNumberOfItems()):
       displayableManager = displayableManagerCollection.GetItemAsObject(index)
       infoString = displayableManager.GetDataProbeInfoStringForPosition(xyz)
       if infoString != "":
@@ -370,8 +377,8 @@ class DataProbeInfoWidget(object):
         pen = qt.QPen()
         pen.setColor(crosshairColor)
         painter.setPen(pen)
-        painter.drawLine(0, imagePixmap.height()/2, imagePixmap.width(), imagePixmap.height()/2)
-        painter.drawLine(imagePixmap.width()/2,0, imagePixmap.width()/2, imagePixmap.height())
+        painter.drawLine(0, old_div(imagePixmap.height(),2), imagePixmap.width(), old_div(imagePixmap.height(),2))
+        painter.drawLine(old_div(imagePixmap.width(),2),0, old_div(imagePixmap.width(),2), imagePixmap.height())
         painter.end()
         return imagePixmap
     return None
@@ -489,7 +496,7 @@ class DataProbeInfoWidget(object):
 # DataProbe widget
 #
 
-class DataProbeWidget:
+class DataProbeWidget(object):
   """This builds the module contents - nothing here"""
   # TODO: Since this is empty for now, it should be hidden
   # from the Modules menu.
@@ -559,7 +566,7 @@ class DataProbeWidget:
     tester.runTest()
 
 
-class CalculateTensorScalars:
+class CalculateTensorScalars(object):
     def __init__(self):
         self.dti_math = teem.vtkDiffusionTensorMathematics()
 
@@ -600,7 +607,7 @@ class CalculateTensorScalars:
 # DataProbeLogic
 #
 
-class DataProbeLogic:
+class DataProbeLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -674,7 +681,7 @@ class DataProbeTest(unittest.TestCase):
     # first, get some data
     #
     if not slicer.util.getNode('FA'):
-      import urllib
+      import urllib.request, urllib.parse, urllib.error
       downloads = (
           ('http://slicer.kitware.com/midas3/download?items=5767', 'FA.nrrd', slicer.util.loadVolume),
           )
@@ -683,7 +690,7 @@ class DataProbeTest(unittest.TestCase):
         filePath = slicer.app.temporaryPath + '/' + name
         if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
           print('Requesting download %s from %s...\n' % (name, url))
-          urllib.urlretrieve(url, filePath)
+          urllib.request.urlretrieve(url, filePath)
         if loader:
           print('Loading %s...\n' % (name,))
           loader(filePath)

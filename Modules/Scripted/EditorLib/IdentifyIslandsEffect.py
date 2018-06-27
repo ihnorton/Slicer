@@ -1,12 +1,14 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import vtk
 import vtkITK
 import ctk
 import qt
 import slicer
-from EditOptions import HelpButton
-import Effect
-import IslandEffect
+from .EditOptions import HelpButton
+from . import Effect
+from . import IslandEffect
 
 __all__ = [
   'IdentifyIslandsEffectOptions',

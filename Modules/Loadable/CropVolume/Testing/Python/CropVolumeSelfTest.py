@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +8,7 @@ import vtk, qt, ctk, slicer
 # CropVolumeSelfTest
 #
 
-class CropVolumeSelfTest:
+class CropVolumeSelfTest(object):
   def __init__(self, parent):
     parent.title = "CropVolumeSelfTest" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -36,7 +38,7 @@ class CropVolumeSelfTest:
 # qCropVolumeSelfTestWidget
 #
 
-class CropVolumeSelfTestWidget:
+class CropVolumeSelfTestWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -88,7 +90,7 @@ class CropVolumeSelfTestWidget:
 # CropVolumeSelfTestLogic
 #
 
-class CropVolumeSelfTestLogic:
+class CropVolumeSelfTestLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import

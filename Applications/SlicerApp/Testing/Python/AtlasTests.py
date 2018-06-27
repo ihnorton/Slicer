@@ -1,3 +1,9 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +12,7 @@ import vtk, qt, ctk, slicer
 # AtlasTests
 #
 
-class AtlasTests:
+class AtlasTests(object):
   def __init__(self, parent):
     parent.title = "AtlasTests" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -44,7 +50,7 @@ class AtlasTests:
 # qAtlasTestsWidget
 #
 
-class AtlasTestsWidget:
+class AtlasTestsWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -134,7 +140,7 @@ class AtlasTestsWidget:
 # AtlasTestsLogic
 #
 
-class AtlasTestsLogic:
+class AtlasTestsLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -240,13 +246,13 @@ class AtlasTestsTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 
     for url,name,loader in downloads:
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)

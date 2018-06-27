@@ -1,3 +1,9 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -7,7 +13,7 @@ from DICOMLib import DICOMUtils
 # RSNAVisTutorial
 #
 
-class RSNAVisTutorial:
+class RSNAVisTutorial(object):
   def __init__(self, parent):
     parent.title = "RSNAVisTutorial" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -38,7 +44,7 @@ class RSNAVisTutorial:
 # qRSNAVisTutorialWidget
 #
 
-class RSNAVisTutorialWidget:
+class RSNAVisTutorialWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -165,7 +171,7 @@ class RSNAVisTutorialWidget:
 # RSNAVisTutorialLogic
 #
 
-class RSNAVisTutorialLogic:
+class RSNAVisTutorialLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -282,7 +288,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
     #
     # first, get the data - a zip file of dicom data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=124183', 'dataset1_Thorax_Abdomen.zip'),
         )
@@ -292,7 +298,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         self.delayDisplay('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
     self.delayDisplay('Finished with download\n')
 
     self.delayDisplay("Unzipping")
@@ -399,7 +405,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       self.takeScreenshot('VolumeRendering-BothKidneys','Rendered both kidneys',-1)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -417,7 +423,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=124180', 'Head_Scene.mrb', slicer.util.loadScene),
         )
@@ -426,7 +432,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -457,7 +463,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
 
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
       cameraNode.GetCamera().Azimuth(90)
@@ -484,14 +490,14 @@ class RSNAVisTutorialTest(unittest.TestCase):
       clip.SetGreenSliceClipState(2)
       self.takeScreenshot('Head-SkullClipping','Turn on clipping for skull model',-1)
 
-      for offset in xrange(-20,20,2):
+      for offset in range(-20,20,2):
         greenController.setSliceOffsetValue(offset)
       self.takeScreenshot('Head-ScrollCoronal','Scroll through coronal slices',-1)
 
       skull.GetDisplayNode().SetVisibility(0)
       self.takeScreenshot('Head-HideSkull','Make the skull invisible',-1)
 
-      for offset in xrange(-40,-20,2):
+      for offset in range(-40,-20,2):
         greenController.setSliceOffsetValue(offset)
       self.takeScreenshot('Head-ScrollCoronalWhiteMatter','Scroll through coronal slices to show white matter',-1)
 
@@ -508,7 +514,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       self.takeScreenshot('Head-Zoom','Zoom',-1)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -524,7 +530,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=124181', 'LiverSegments_Scene.mrb', slicer.util.loadScene),
         )
@@ -533,7 +539,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -549,7 +555,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       redController = redWidget.sliceController()
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
 
@@ -575,7 +581,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       self.takeScreenshot('Liver-ViewAdrenal','View Adrenal',-1)
 
       models = slicer.util.getNodes('vtkMRMLModelNode*')
-      for modelNode in models.values():
+      for modelNode in list(models.values()):
         modelNode.GetDisplayNode().SetVisibility(0)
 
       transparentNodes = ('MiddleHepaticVein_and_Branches','LiverSegment_IVb','LiverSegmentV',)
@@ -589,7 +595,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       self.takeScreenshot('Liver-MiddleHepatic','Middle Hepatic',-1)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))
@@ -604,7 +610,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=124182', 'LungSegments_Scene.mrb', slicer.util.loadScene),
         )
@@ -613,7 +619,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -628,7 +634,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       redController = redWidget.sliceController()
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
 
@@ -669,7 +675,7 @@ class RSNAVisTutorialTest(unittest.TestCase):
       self.takeScreenshot('Lung-Question4','View Question 4',-1)
 
       self.delayDisplay('Test passed!')
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))

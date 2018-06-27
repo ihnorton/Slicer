@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import slicer
 import logging
 
@@ -101,7 +103,7 @@ class DICOMPlugin(object):
     """ Helper method to access the results of a previous
     examination of a list of files"""
     key = self.hashFiles(files)
-    if self.loadableCache.has_key(key):
+    if key in self.loadableCache:
       return self.loadableCache[key]
     return None
 
@@ -319,13 +321,13 @@ class DICOMPlugin(object):
     # Note more specialized definitions can be specified for MR by more
     # specialized plugins, see codes 110800 and on in
     # http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_D.html
-    if classUID in MRname2UID.values():
+    if classUID in list(MRname2UID.values()):
       quantity = slicer.vtkCodedEntry()
       quantity.SetValueSchemeMeaning("110852", "DCM", "MR signal intensity")
       units = slicer.vtkCodedEntry()
       units.SetValueSchemeMeaning("1", "UCUM", "no units")
 
-    if classUID in CTname2UID.values():
+    if classUID in list(CTname2UID.values()):
       quantity = slicer.vtkCodedEntry()
       quantity.SetValueSchemeMeaning("112031", "DCM", "Attenuation Coefficient")
       units = slicer.vtkCodedEntry()

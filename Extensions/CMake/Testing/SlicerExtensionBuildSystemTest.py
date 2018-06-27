@@ -1,3 +1,8 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import hashlib
 import io
 import json
@@ -11,10 +16,10 @@ import sys
 import textwrap
 import threading
 
-import BaseHTTPServer
-import SocketServer as socketserver
+import http.server
+import socketserver as socketserver
 
-from urlparse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 
 import SlicerExtensionBuildSystemTestConfig as config
 
@@ -60,7 +65,7 @@ def get_open_port():
   port = s.getsockname()[1]
   return port
 
-class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+class Handler(http.server.BaseHTTPRequestHandler):
 
   def send_response_with_message(self,
       code=200, message="OK", response_type="text/html"):
@@ -606,7 +611,7 @@ include({slicer_source_dir}/Extensions/CMake/SlicerExtensionsDashboardDriverScri
       query_data = parsed_request[1]
       self.assertEqual(http_method, expected_http_method)
       self.assertEqual(query_data['method'][0], expected_midas_method)
-      for expected_key, expected_value in expected_params.iteritems():
+      for expected_key, expected_value in expected_params.items():
         self.assertEqual(query_data[expected_key][0], expected_value)
 
     requests = iter(_requests)
@@ -633,33 +638,33 @@ include({slicer_source_dir}/Extensions/CMake/SlicerExtensionsDashboardDriverScri
     # Check CDash and Midas queries
     if with_ctest:
       # Upload top-level configure results to CDash
-      check_cdash_request(parse_request(requests.next()), 'PUT', r'.+Configure\.xml')
+      check_cdash_request(parse_request(next(requests)), 'PUT', r'.+Configure\.xml')
 
     for extensionName in ['TestExtA', 'TestExtB', 'TestExtC', 'TestExtInvalidSCM']:
 
       # Upload configure/build/test results to CDash
-      check_cdash_request(parse_request(requests.next()), 'PUT', r'.+' + extensionName + r'.+Configure\.xml')
+      check_cdash_request(parse_request(next(requests)), 'PUT', r'.+' + extensionName + r'.+Configure\.xml')
       if extensionName == 'TestExtInvalidSCM':
         continue
-      check_cdash_request(parse_request(requests.next()), 'PUT', r'.+' + extensionName + r'.+Build\.xml')
-      check_cdash_request(parse_request(requests.next()), 'PUT', r'.+' + extensionName + r'.+Test\.xml')
+      check_cdash_request(parse_request(next(requests)), 'PUT', r'.+' + extensionName + r'.+Build\.xml')
+      check_cdash_request(parse_request(next(requests)), 'PUT', r'.+' + extensionName + r'.+Test\.xml')
 
       if test_upload:
         # Upload package to midas
-        check_midas_request(parse_request(requests.next()), 'GET', 'midas.login')
-        check_midas_request(parse_request(requests.next()), 'PUT', 'midas.slicerpackages.extension.upload', {'productname': extensionName})
+        check_midas_request(parse_request(next(requests)), 'GET', 'midas.login')
+        check_midas_request(parse_request(next(requests)), 'PUT', 'midas.slicerpackages.extension.upload', {'productname': extensionName})
 
       # Upload packaging result to CDash
-      check_cdash_request(parse_request(requests.next()), 'PUT', r'.+' + extensionName + r'.+Build\.xml')
+      check_cdash_request(parse_request(next(requests)), 'PUT', r'.+' + extensionName + r'.+Build\.xml')
 
       if test_upload:
         # Upload url to CDash
-        check_cdash_request(parse_request(requests.next()), 'PUT', r'.+' + extensionName + r'.+Upload\.xml')
+        check_cdash_request(parse_request(next(requests)), 'PUT', r'.+' + extensionName + r'.+Upload\.xml')
 
     if with_ctest:
       # Upload top-level build results and notes to CDash
-      check_cdash_request(parse_request(requests.next()), 'PUT', r'.+Build\.xml')
-      check_cdash_request(parse_request(requests.next()), 'PUT', r'.+Notes\.xml')
+      check_cdash_request(parse_request(next(requests)), 'PUT', r'.+Build\.xml')
+      check_cdash_request(parse_request(next(requests)), 'PUT', r'.+Notes\.xml')
 
   def _check_midas_upload_query_parameters(self, test_upload, with_ctest=False):
     if not test_upload:
@@ -715,7 +720,7 @@ include({slicer_source_dir}/Extensions/CMake/SlicerExtensionsDashboardDriverScri
 
         self.assertEqual(sorted(query_data.keys()), sorted(expected_query_data.keys()))
 
-        for key, expected_value in expected_query_data.items():
+        for key, expected_value in list(expected_query_data.items()):
           current_value = query_data[key]
           if expected_value is None:
             # XXX For now only consider values that do not change with platform

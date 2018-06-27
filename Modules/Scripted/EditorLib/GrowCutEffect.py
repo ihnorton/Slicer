@@ -1,12 +1,16 @@
+from __future__ import division
+from __future__ import absolute_import
+from past.utils import old_div
 import os
 import vtk
 import vtkITK
 import ctk
 import qt
 import slicer
-from EditOptions import HelpButton
-import Effect
+from .EditOptions import HelpButton
+from . import Effect
 import logging
+from functools import reduce
 
 __all__ = [
   'GrowCutEffectOptions',
@@ -195,10 +199,10 @@ class GrowCutEffectLogic(Effect.EffectLogic):
 
     spacing = gestureInput.GetSpacing()
     voxelVolume = reduce(lambda x,y: x*y, spacing)
-    voxelAmount = objectSize / voxelVolume
+    voxelAmount = old_div(objectSize, voxelVolume)
     voxelNumber = round(voxelAmount) * conversion
 
-    cubeRoot = 1./3.
+    cubeRoot = old_div(1.,3.)
     oSize = int(round(pow(voxelNumber,cubeRoot)))
 
     growCutFilter.SetObjectSize( oSize )

@@ -1,5 +1,6 @@
 
 
+from builtins import object
 class qSlicerScriptedLoadableModuleNewStyleTest(object):
   def __init__(self, parent):
     parent.title = "qSlicerScriptedLoadableModuleNewStyle Test"

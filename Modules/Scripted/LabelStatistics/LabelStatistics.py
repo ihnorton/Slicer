@@ -1,8 +1,13 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
 import logging
+from functools import reduce
 
 #
 # LabelStatistics
@@ -307,7 +312,7 @@ class LabelStatisticsLogic(ScriptedLoadableModuleLogic):
     lo = int(stataccum.GetMin()[0])
     hi = int(stataccum.GetMax()[0])
 
-    for i in xrange(lo,hi+1):
+    for i in range(lo,hi+1):
 
       # this->SetProgress((float)i/hi);
       # std::string event_message = "Label "; std::stringstream s; s << i; event_message.append(s.str());
@@ -396,7 +401,7 @@ class LabelStatisticsLogic(ScriptedLoadableModuleLogic):
       tuples -= 1
     array.SetNumberOfTuples(tuples)
     tuple = 0
-    for i in xrange(samples):
+    for i in range(samples):
         index = self.labelStats["Labels"][i]
         if not (ignoreZero and index == 0):
           array.SetComponent(tuple, 0, index)

@@ -28,7 +28,10 @@
 #
 
 from __future__ import print_function
+from __future__ import division
 
+from builtins import range
+from past.utils import old_div
 import os
 import pipes
 import subprocess
@@ -93,7 +96,7 @@ def timecall(method, **kwargs):
       result = method(*args, **kwargs)
       durations.append(time.time() - start)
       print("{:d}/{:d}: {:.2f}s".format(iteration, repeat, durations[-1]))
-    average = sum(durations) / len(durations)
+    average = old_div(sum(durations), len(durations))
     print("Average: {:.2f}s\n".format(average))
     duration = average
     return (duration, result)

@@ -1,3 +1,6 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import argparse
 import logging
 import os
@@ -5,11 +8,11 @@ import re
 import sys
 import textwrap
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 # If Python is not built with SSL support then do not even try to import
 # GithubHelper (it would throw missing attribute error for HTTPSConnection)
-import httplib
+import http.client
 if hasattr(httplib, "HTTPSConnection"):
   # SSL is available
   try:

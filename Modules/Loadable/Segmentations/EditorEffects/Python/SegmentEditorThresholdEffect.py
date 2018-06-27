@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 import os
 import vtk, qt, ctk, slicer
 import logging
@@ -172,7 +175,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
     if masterImageData:
       lo, hi = masterImageData.GetScalarRange()
       self.thresholdSlider.setRange(lo, hi)
-      self.thresholdSlider.singleStep = (hi - lo) / 1000.
+      self.thresholdSlider.singleStep = old_div((hi - lo), 1000.)
       if (self.scriptedEffect.doubleParameter("MinimumThreshold") == self.scriptedEffect.doubleParameter("MaximumThreshold")):
         # has not been initialized yet
         self.scriptedEffect.setParameter("MinimumThreshold", lo+(hi-lo)*0.25)
@@ -338,7 +341,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
     self.scriptedEffect.selectEffect("")
 
   def clearPreviewDisplay(self):
-    for sliceWidget, pipeline in self.previewPipelines.iteritems():
+    for sliceWidget, pipeline in self.previewPipelines.items():
       self.scriptedEffect.removeActor2D(sliceWidget, pipeline.actor)
     self.previewPipelines = {}
 
@@ -369,7 +372,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
 
   def preview(self):
 
-    opacity = 0.5 + self.previewState / (2. * self.previewSteps)
+    opacity = 0.5 + old_div(self.previewState, (2. * self.previewSteps))
     min = self.scriptedEffect.doubleParameter("MinimumThreshold")
     max = self.scriptedEffect.doubleParameter("MaximumThreshold")
 
@@ -405,7 +408,7 @@ class SegmentEditorThresholdEffect(AbstractScriptedSegmentEditorEffect):
 #
 # PreviewPipeline
 #
-class PreviewPipeline:
+class PreviewPipeline(object):
   """ Visualization objects and pipeline for each slice view for threshold preview
   """
 

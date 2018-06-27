@@ -1,3 +1,8 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +11,7 @@ import vtk, qt, ctk, slicer
 # slicerCloseCrashBug2590
 #
 
-class slicerCloseCrashBug2590:
+class slicerCloseCrashBug2590(object):
   def __init__(self, parent):
     parent.title = "slicerCloseCrashBug2590" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -37,7 +42,7 @@ class slicerCloseCrashBug2590:
 # qslicerCloseCrashBug2590Widget
 #
 
-class slicerCloseCrashBug2590Widget:
+class slicerCloseCrashBug2590Widget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -108,7 +113,7 @@ class slicerCloseCrashBug2590Widget:
 # slicerCloseCrashBug2590Logic
 #
 
-class slicerCloseCrashBug2590Logic:
+class slicerCloseCrashBug2590Logic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -173,7 +178,7 @@ class slicerCloseCrashBug2590Test(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=8986', 'RSNA2011_ChangeTracker_data.zip', slicer.util.loadScene),
         )
@@ -182,7 +187,7 @@ class slicerCloseCrashBug2590Test(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)
@@ -197,7 +202,7 @@ class slicerCloseCrashBug2590Test(unittest.TestCase):
       redController = redWidget.sliceController()
       viewNode = threeDView.mrmlViewNode()
       cameras = slicer.util.getNodes('vtkMRMLCameraNode*')
-      for cameraNode in cameras.values():
+      for cameraNode in list(cameras.values()):
         if cameraNode.GetActiveTag() == viewNode.GetID():
           break
 
@@ -277,7 +282,7 @@ class slicerCloseCrashBug2590Test(unittest.TestCase):
       '''
 
       # intentionally do not close the scene -- the issue is reproduced on close
-    except Exception, e:
+    except Exception as e:
       import traceback
       traceback.print_exc()
       self.delayDisplay('Test caused exception!\n' + str(e))

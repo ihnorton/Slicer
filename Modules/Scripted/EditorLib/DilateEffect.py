@@ -1,11 +1,14 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
 import os
 import vtk
 import ctk
 import qt
 import slicer
-from EditOptions import HelpButton
-import Effect
-import MorphologyEffect
+from .EditOptions import HelpButton
+from . import Effect
+from . import MorphologyEffect
 
 __all__ = [
   'DilateEffectOptions',
@@ -151,7 +154,7 @@ class DilateEffectLogic(MorphologyEffect.MorphologyEffectLogic):
       # bad neighbor mode - silently use default
       print('Bad neighborMode: %s' % neighborMode)
 
-    for i in xrange(iterations):
+    for i in range(iterations):
       # TODO: $this setProgressFilter eroder "Dilate ($i)"
       eroder.Update()
 

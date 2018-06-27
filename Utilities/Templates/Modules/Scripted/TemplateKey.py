@@ -1,3 +1,5 @@
+from future import standard_library
+standard_library.install_aliases()
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -268,7 +270,7 @@ class TemplateKeyTest(ScriptedLoadableModuleTest):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=5767', 'FA.nrrd', slicer.util.loadVolume),
         )
@@ -277,7 +279,7 @@ class TemplateKeyTest(ScriptedLoadableModuleTest):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         logging.info('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         logging.info('Loading %s...' % (name,))
         loader(filePath)

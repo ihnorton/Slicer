@@ -1,3 +1,8 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import slicer
 import sitkUtils as su
 
@@ -41,10 +46,10 @@ class SitkUtilsTests(unittest.TestCase):
 
         """ Few pixel changed """
         size = sitkimage.GetSize()
-        for x in xrange(0,size[0],(int)(size[0]/10)):
-            for y in xrange(0,size[1],(int)(size[1]/10)):
-                for z in xrange(0,size[2],(int)(size[2]/10)):
-                    sitkimage.SetPixel(x,y,z,0L)
+        for x in range(0,size[0],(int)(old_div(size[0],10))):
+            for y in range(0,size[1],(int)(old_div(size[1],10))):
+                for z in range(0,size[2],(int)(old_div(size[2],10))):
+                    sitkimage.SetPixel(x,y,z,0)
 
         volumeNode1Modified = su.PushVolumeToSlicer(sitkimage, name="ImageChanged", className="vtkMRMLScalarVolumeNode")
         self.assertEqual(volumeNode1Modified.GetName(), "ImageChanged",
@@ -113,10 +118,10 @@ class SitkUtilsTests(unittest.TestCase):
 
         """ Few pixel changed """
         size = sitkimage.GetSize()
-        for x in xrange(0,size[0],(int)(size[0]/10)):
-            for y in xrange(0,size[1],(int)(size[1]/10)):
-                for z in xrange(0,size[2],(int)(size[2]/10)):
-                    sitkimage.SetPixel(x,y,z,0L)
+        for x in range(0,size[0],(int)(old_div(size[0],10))):
+            for y in range(0,size[1],(int)(old_div(size[1],10))):
+                for z in range(0,size[2],(int)(old_div(size[2],10))):
+                    sitkimage.SetPixel(x,y,z,0)
 
 
         su.PushToSlicer(sitkimage, 'ImageChanged', compositeView=0, overwrite=False)
@@ -132,7 +137,7 @@ class SitkUtilsTests(unittest.TestCase):
                          'Modified origin mismatch')
 
         """ Test push with all parameter combinations """
-        for compositeView in xrange(3): # background, foreground, label
+        for compositeView in range(3): # background, foreground, label
             for overwrite in [False, True]:
                 su.PushToSlicer(sitkimage, 'volumeNode'+str(compositeView)+str(overwrite),
                                 compositeView, overwrite)

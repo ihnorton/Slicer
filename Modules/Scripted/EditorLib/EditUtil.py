@@ -1,3 +1,7 @@
+from builtins import str
+from builtins import range
+from past.builtins import basestring
+from builtins import object
 import vtk
 import slicer
 import logging
@@ -35,7 +39,7 @@ class EditUtil(object):
   def _findParameterNodeInScene():
     node = None
     size =  slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLScriptedModuleNode")
-    for i in xrange(size):
+    for i in range(size):
       n  = slicer.mrmlScene.GetNthNodeByClass( i, "vtkMRMLScriptedModuleNode" )
       if n.GetModuleName() == "Editor" and n.GetSingletonTag() == "Editor":
         node = n
@@ -78,7 +82,7 @@ class EditUtil(object):
   def getCompositeNode(layoutName='Red'):
     """ use the Red slice composite node to define the active volumes """
     count = slicer.mrmlScene.GetNumberOfNodesByClass('vtkMRMLSliceCompositeNode')
-    for n in xrange(count):
+    for n in range(count):
       compNode = slicer.mrmlScene.GetNthNodeByClass(n, 'vtkMRMLSliceCompositeNode')
       if compNode.GetLayoutName() == layoutName:
         return compNode
@@ -267,19 +271,19 @@ class EditUtil(object):
   @staticmethod
   def toggleLabelOutline():
     """Switch the label outline mode for all composite nodes in the scene"""
-    for sliceNode in slicer.util.getNodes('vtkMRMLSliceNode*').values():
+    for sliceNode in list(slicer.util.getNodes('vtkMRMLSliceNode*').values()):
       sliceNode.SetUseLabelOutline(not sliceNode.GetUseLabelOutline())
 
   @staticmethod
   def setLabelOutline(state):
     """Set the label outline mode for all composite nodes in the scene to state"""
-    for sliceNode in slicer.util.getNodes('vtkMRMLSliceNode*').values():
+    for sliceNode in list(slicer.util.getNodes('vtkMRMLSliceNode*').values()):
       sliceNode.SetUseLabelOutline(state)
 
   @staticmethod
   def toggleForegroundBackground():
     """Swap the foreground and background volumes for all composite nodes in the scene"""
-    for sliceCompositeNode in slicer.util.getNodes('vtkMRMLSliceCompositeNode*').values():
+    for sliceCompositeNode in list(slicer.util.getNodes('vtkMRMLSliceCompositeNode*').values()):
       oldForeground = sliceCompositeNode.GetForegroundVolumeID()
       sliceCompositeNode.SetForegroundVolumeID(sliceCompositeNode.GetBackgroundVolumeID())
       sliceCompositeNode.SetBackgroundVolumeID(oldForeground)
@@ -339,7 +343,7 @@ class EditUtil(object):
     hi = int(accum.GetMax()[0])
 
     thresholder = vtk.vtkImageThreshold()
-    for index in xrange(lo,hi+1):
+    for index in range(lo,hi+1):
       logging.info( "Splitting label %d..."%index )
       thresholder.SetInputConnection( mergeNode.GetImageDataConnection() )
       thresholder.SetInValue( index )

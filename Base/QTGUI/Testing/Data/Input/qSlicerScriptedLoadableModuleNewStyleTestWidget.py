@@ -1,5 +1,6 @@
 
 
+from builtins import object
 class qSlicerScriptedLoadableModuleNewStyleTestWidget(object):
   def __init__(self, parent=None):
     self.parent = parent

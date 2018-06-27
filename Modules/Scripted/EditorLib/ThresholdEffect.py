@@ -1,10 +1,14 @@
+from __future__ import division
+from __future__ import absolute_import
+from builtins import str
+from past.utils import old_div
 import os
 import vtk
 import ctk
 import qt
 import slicer
-from EditOptions import HelpButton
-import Effect
+from .EditOptions import HelpButton
+from . import Effect
 
 __all__ = [
   'ThresholdEffectOptions',
@@ -55,7 +59,7 @@ class ThresholdEffectOptions(Effect.EffectOptions):
     success, lo, hi = self.getBackgroundScalarRange()
     if success:
       self.threshold.minimum, self.threshold.maximum = lo, hi
-      self.threshold.singleStep = (hi - lo) / 1000.
+      self.threshold.singleStep = old_div((hi - lo), 1000.)
     self.frame.layout().addWidget(self.threshold)
     self.widgets.append(self.threshold)
 
@@ -177,7 +181,7 @@ class ThresholdEffectOptions(Effect.EffectOptions):
       self.parameterNode.InvokePendingModifiedEvent()
 
   def preview(self):
-    opacity = 0.5 + self.previewState / (2. * self.previewSteps)
+    opacity = 0.5 + old_div(self.previewState, (2. * self.previewSteps))
     min = float(self.parameterNode.GetParameter("ThresholdEffect,min"))
     max = float(self.parameterNode.GetParameter("ThresholdEffect,max"))
     for tool in self.tools:

@@ -1,8 +1,13 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from past.utils import old_div
 import os
 import vtk, qt, ctk, slicer
-from EditOptions import HelpButton
-from EditUtil import EditUtil
-import Effect
+from .EditOptions import HelpButton
+from .EditUtil import EditUtil
+from . import Effect
 
 __all__ = [
   'FastMarchingEffectOptions',
@@ -129,14 +134,14 @@ class FastMarchingEffectOptions(Effect.EffectOptions):
       pass
 
   def onMarcherChanged(self,value):
-    self.logic.updateLabel(value/self.marcher.maximum)
+    self.logic.updateLabel(old_div(value,self.marcher.maximum))
 
   def percentMaxChanged(self, val):
     labelNode = self.logic.getLabelNode()
     labelImage = EditUtil.getLabelImage()
     spacing = labelNode.GetSpacing()
     dim = labelImage.GetDimensions()
-    print dim
+    print(dim)
     totalVolume = spacing[0]*dim[0]+spacing[1]*dim[1]+spacing[2]*dim[2]
 
     percentVolumeStr = "%.5f" % (totalVolume*val/100.)
@@ -209,7 +214,7 @@ class FastMarchingEffectLogic(Effect.EffectLogic):
 
     # collect seeds
     dim = bgImage.GetDimensions()
-    print dim
+    print(dim)
     # initialize the filter
     self.fm = slicer.vtkPichonFastMarching()
     scalarRange = bgImage.GetScalarRange()
@@ -221,7 +226,7 @@ class FastMarchingEffectLogic(Effect.EffectLogic):
     shiftValue = 0
 
     if depth>300:
-      scaleValue = 300./depth
+      scaleValue = old_div(300.,depth)
     if scalarRange[0] < 0:
       shiftValue = scalarRange[0]*-1
 

@@ -1,3 +1,7 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import os
 import unittest
 import vtk, qt, ctk, slicer
@@ -6,7 +10,7 @@ import vtk, qt, ctk, slicer
 # Slicer4Minute
 #
 
-class Slicer4Minute:
+class Slicer4Minute(object):
   def __init__(self, parent):
     parent.title = "Slicer4Minute" # TODO make this more human readable by adding spaces
     parent.categories = ["Testing.TestCases"]
@@ -37,7 +41,7 @@ class Slicer4Minute:
 # qSlicer4MinuteWidget
 #
 
-class Slicer4MinuteWidget:
+class Slicer4MinuteWidget(object):
   def __init__(self, parent = None):
     if not parent:
       self.parent = slicer.qMRMLWidget()
@@ -91,7 +95,7 @@ class Slicer4MinuteWidget:
     self.helloWorldButton = helloWorldButton
 
   def onHelloWorldButtonClicked(self):
-    print "Hello World !"
+    print("Hello World !")
 
   def onReload(self,moduleName="Slicer4Minute"):
     """Generic reload method for any scripted module.
@@ -109,7 +113,7 @@ class Slicer4MinuteWidget:
 # Slicer4MinuteLogic
 #
 
-class Slicer4MinuteLogic:
+class Slicer4MinuteLogic(object):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -176,7 +180,7 @@ class Slicer4MinuteTest(unittest.TestCase):
     #
     # first, get some data
     #
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     downloads = (
         ('http://slicer.kitware.com/midas3/download?items=8466', 'slicer4minute.mrb', slicer.util.loadScene),
         )
@@ -185,7 +189,7 @@ class Slicer4MinuteTest(unittest.TestCase):
       filePath = slicer.app.temporaryPath + '/' + name
       if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
         print('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
+        urllib.request.urlretrieve(url, filePath)
       if loader:
         print('Loading %s...\n' % (name,))
         loader(filePath)

@@ -1,10 +1,14 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 import os
 import vtk
 import qt
 import ctk
 import slicer
-from EditUtil import EditUtil
-import Effect
+from .EditUtil import EditUtil
+from . import Effect
 
 __all__ = [
   'LabelEffectOptions',
@@ -385,7 +389,7 @@ class LabelEffectLogic(Effect.EffectLogic):
     br = [0,] * 3
     corners = ((tlIJK, tl),(trIJK, tr),(blIJK, bl),(brIJK, br))
     for corner,clampedCorner in corners:
-      for d in xrange(3):
+      for d in range(3):
         clamped = int(round(corner[d]))
         if clamped < 0: clamped = 0
         if clamped >= dims[d]: clamped = dims[d]-1

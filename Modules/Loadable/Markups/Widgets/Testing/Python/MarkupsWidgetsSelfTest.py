@@ -1,3 +1,4 @@
+from builtins import range
 import os
 import unittest
 import vtk, qt, ctk, slicer
