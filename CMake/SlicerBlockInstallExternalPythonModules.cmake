@@ -5,7 +5,7 @@ endif()
 
 # Install VTK python module
 if(Slicer_VTK_VERSION_MAJOR VERSION_GREATER "7")
-  set(VTK_PYTHON_MODULE "${VTK_DIR}/lib/python2.7/site-packages")
+  set(VTK_PYTHON_MODULE "${VTK_DIR}/lib/python3.6m/site-packages")
 else()
   set(VTK_PYTHON_MODULE "${VTK_DIR}/Wrapping/Python")
 endif()
@@ -31,7 +31,7 @@ endif()
 
 # Install external python runtime libraries that we don't link to (fixupbundle won't copy them)
 if(Slicer_VTK_VERSION_MAJOR VERSION_GREATER "7")
-  set(vtk_python_library_subdir "lib/python2.7/site-packages/${_vtk_package}")
+  set(vtk_python_library_subdir "lib/python3.6m/site-packages/${_vtk_package}")
 else()
   set(vtk_python_library_subdir "lib")
 endif()

@@ -205,7 +205,7 @@ endif()
   if(Slicer_VTK_VERSION_MAJOR VERSION_GREATER 7)
     if(UNIX)
       set(${proj}_PYTHONPATH_LAUNCHER_BUILD
-        ${VTK_DIR}/${_library_output_subdir}/python2.7/site-packages
+        ${VTK_DIR}/${_library_output_subdir}/python3.6m/site-packages
         )
     else()
       set(${proj}_PYTHONPATH_LAUNCHER_BUILD
@@ -234,7 +234,7 @@ endif()
     if(Slicer_VTK_VERSION_MAJOR VERSION_GREATER 8)
       if(UNIX)
         set(${proj}_PYTHONPATH_LAUNCHER_INSTALLED
-          <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_INSTALL_LIB_DIR}/python2.7/site-packages
+          <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_INSTALL_LIB_DIR}/python3.6m/site-packages
           )
       else()
         set(${proj}_PYTHONPATH_LAUNCHER_INSTALLED
@@ -243,7 +243,7 @@ endif()
       endif()
     else()
       set(${proj}_PYTHONPATH_LAUNCHER_INSTALLED
-        <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_INSTALL_LIB_DIR}/python2.7/site-packages
+        <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_INSTALL_LIB_DIR}/python3.6m/site-packages
         )
     endif()
     mark_as_superbuild(

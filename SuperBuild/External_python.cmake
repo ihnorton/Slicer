@@ -29,7 +29,7 @@ endif()
 #       by ExternalProjectDependency module.
 #       That way, the variable are available in External_tcl.cmake despite the fact
 #       the "tcl" project does NOT directly depend on "python".
-set(PYTHON_STDLIB_SUBDIR lib/python2.7)
+set(PYTHON_STDLIB_SUBDIR lib/python3.6)
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(PYTHON_STDLIB_SUBDIR Lib)
 endif()
@@ -42,8 +42,8 @@ if(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
   unset(PYTHON_INCLUDE_DIR CACHE)
   unset(PYTHON_LIBRARY CACHE)
   unset(PYTHON_EXECUTABLE CACHE)
-  find_package(PythonLibs 2.7 REQUIRED)
-  find_package(PythonInterp 2.7 REQUIRED)
+  find_package(PythonLibs 3.6 REQUIRED)
+  find_package(PythonInterp 3.6 REQUIRED)
   set(PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIRS})
   set(PYTHON_LIBRARY ${PYTHON_LIBRARIES})
   set(PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE})
@@ -53,11 +53,12 @@ if((NOT DEFINED PYTHON_INCLUDE_DIR
    OR NOT DEFINED PYTHON_LIBRARY
    OR NOT DEFINED PYTHON_EXECUTABLE) AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
-  set(python_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python-2.7.13")
+  set(python_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python-3.6.4")
 
   ExternalProject_Add(python-source
-    URL "https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz"
-    URL_MD5 "17add4bf0ad0ec2f08e0cae6d205c700"
+#    URL "https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz"
+#    URL_MD5 "17add4bf0ad0ec2f08e0cae6d205c700"
+    URL "https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tgz"
     DOWNLOAD_DIR ${CMAKE_BINARY_DIR}
     SOURCE_DIR ${python_SOURCE_DIR}
     CONFIGURE_COMMAND ""
@@ -183,14 +184,14 @@ if((NOT DEFINED PYTHON_INCLUDE_DIR
       set(python_IMPORT_SUFFIX dylib)
     endif()
     set(slicer_PYTHON_SHARED_LIBRARY_DIR ${python_DIR}/lib)
-    set(PYTHON_INCLUDE_DIR ${python_DIR}/include/python2.7)
-    set(PYTHON_LIBRARY ${python_DIR}/lib/libpython2.7.${python_IMPORT_SUFFIX})
+    set(PYTHON_INCLUDE_DIR ${python_DIR}/include/python3.6m)
+    set(PYTHON_LIBRARY ${python_DIR}/lib/libpython3.6m.${python_IMPORT_SUFFIX})
     set(PYTHON_EXECUTABLE ${python_DIR}/bin/SlicerPython)
     set(slicer_PYTHON_REAL_EXECUTABLE ${python_DIR}/bin/python)
   elseif(WIN32)
     set(slicer_PYTHON_SHARED_LIBRARY_DIR ${python_DIR}/bin)
     set(PYTHON_INCLUDE_DIR ${python_DIR}/include)
-    set(PYTHON_LIBRARY ${python_DIR}/libs/python27.lib)
+    set(PYTHON_LIBRARY ${python_DIR}/libs/python36.lib)
     set(PYTHON_EXECUTABLE ${python_DIR}/bin/SlicerPython.exe)
     set(slicer_PYTHON_REAL_EXECUTABLE ${python_DIR}/bin/python.exe)
   else()

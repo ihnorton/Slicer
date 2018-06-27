@@ -152,7 +152,7 @@ PyObject* qSlicerPythonCppAPI::instantiateClass(QObject* cpp, const QString& cla
     }
   else
     {
-    self.setNewRef(PyInstance_New(classToInstantiate, arguments, 0));
+    self.setNewRef(PyObject_CallObject(classToInstantiate, arguments));
     }
 
   Py_DECREF(arguments);

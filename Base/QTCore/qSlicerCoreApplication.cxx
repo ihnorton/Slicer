@@ -887,14 +887,17 @@ void qSlicerCoreApplication::handleCommandLineArguments()
       }
 
     // Set 'argv' so that python script can retrieve its associated arguments
+
+    // TODO do we need validation here?
+
     int pythonArgc = 1 /*scriptname*/ + scriptArgs.count();
-    char** pythonArgv = new char*[pythonArgc];
-    pythonArgv[0] = new char[pythonScript.size() + 1];
-    strcpy(pythonArgv[0], pythonScript.toLatin1());
+    wchar_t** pythonArgv = new wchar_t*[pythonArgc];
+    pythonArgv[0] = new wchar_t[pythonScript.size() + 1];
+    pythonScript.toWCharArray(pythonArgv[0]);
     for(int i = 0; i < scriptArgs.count(); ++i)
       {
-      pythonArgv[i + 1] = new char[scriptArgs.at(i).size() + 1];
-      strcpy(pythonArgv[i + 1], scriptArgs.at(i).toLatin1());
+      pythonArgv[i + 1] = new wchar_t[scriptArgs.at(i).size() + 1];
+      scriptArgs.at(i).toWCharArray(pythonArgv[i + 1]);
       }
 
     // See http://docs.python.org/c-api/init.html
