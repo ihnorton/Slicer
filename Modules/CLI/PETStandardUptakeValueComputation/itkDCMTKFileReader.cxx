@@ -1145,7 +1145,7 @@ DCMTKFileReader
 {
   DcmDataDictionary &dict = dcmDataDict.wrlock();
   dict.addEntry(entry);
-  dcmDataDict.unlock();
+  dcmDataDict.rdunlock();
 }
 
 unsigned
