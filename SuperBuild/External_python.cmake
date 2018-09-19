@@ -16,6 +16,10 @@ if (Slicer_USE_CTKAPPLAUNCHER)
   list(APPEND ${proj}_DEPENDENCIES
     CTKAPPLAUNCHER
     )
+else()
+  list(APPEND ${proj}_DEPENDENCIES
+    CTKAppLauncherLib
+    )
 endif()
 
 if(Slicer_USE_PYTHONQT_WITH_TCL)
