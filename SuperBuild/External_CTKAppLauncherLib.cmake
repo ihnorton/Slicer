@@ -73,6 +73,11 @@ if(NOT DEFINED CTKAppLauncherLib_DIR AND NOT Slicer_USE_SYSTEM_${proj})
 
   set(CTKAppLauncherLib_DIR ${EP_BINARY_DIR})
 
+  # Use this locally-built copy when creating launchers
+  if (NOT Slicer_USE_CTKAPPLAUNCHER)
+    set(CTKApplauncher_DIR ${EP_BINARY_DIR})
+  endif()
+
   #-----------------------------------------------------------------------------
   # Launcher setting specific to build tree
 

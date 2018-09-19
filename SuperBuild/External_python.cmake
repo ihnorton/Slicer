@@ -8,10 +8,16 @@ set(${proj}_DEPENDENCIES "")
 if(NOT Slicer_USE_SYSTEM_python)
   list(APPEND ${proj}_DEPENDENCIES
     bzip2
-    CTKAPPLAUNCHER
     zlib
     )
 endif()
+
+if (Slicer_USE_CTKAPPLAUNCHER)
+  list(APPEND ${proj}_DEPENDENCIES
+    CTKAPPLAUNCHER
+    )
+endif()
+
 if(Slicer_USE_PYTHONQT_WITH_TCL)
   if(WIN32)
     list(APPEND ${proj}_DEPENDENCIES tcl)
