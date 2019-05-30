@@ -36,8 +36,9 @@
 #include <qMRMLThreeDWidget.h>
 
 // MRMLLogic includes
-#include <vtkMRMLSliceLogic.h>
 #include <vtkMRMLColorLogic.h>
+#include <vtkMRMLSliceLogic.h>
+#include <vtkMRMLViewLogic.h>
 
 // MRML includes
 #include <vtkMRMLLayoutNode.h>
@@ -60,12 +61,55 @@
 qMRMLLayoutThreeDViewFactory::qMRMLLayoutThreeDViewFactory(QObject* parent)
   : qMRMLLayoutViewFactory(parent)
 {
+  this->ViewLogics = vtkCollection::New();
+}
+
+//------------------------------------------------------------------------------
+qMRMLLayoutThreeDViewFactory::~qMRMLLayoutThreeDViewFactory()
+{
+  this->setViewLogics(0);
 }
 
 //------------------------------------------------------------------------------
 QString qMRMLLayoutThreeDViewFactory::viewClassName()const
 {
   return "vtkMRMLViewNode";
+}
+
+//------------------------------------------------------------------------------
+vtkCollection* qMRMLLayoutThreeDViewFactory::viewLogics() const
+{
+  return this->ViewLogics;
+}
+
+//------------------------------------------------------------------------------
+void qMRMLLayoutThreeDViewFactory::setViewLogics(vtkCollection* viewLogics)
+{
+  if (viewLogics == this->ViewLogics)
+    {
+    return;
+    }
+  if (this->ViewLogics)
+    {
+    for (int viewIndex = 0; viewIndex < this->viewCount(); ++viewIndex)
+      {
+      qMRMLThreeDWidget* threeDWidget =
+        qobject_cast<qMRMLThreeDWidget*>(viewWidget(viewIndex));
+      vtkMRMLViewLogic* viewLogic =
+        threeDWidget ? threeDWidget->viewLogic() : 0;
+      if (viewLogics)
+        {
+        viewLogics->AddItem(viewLogic);
+        }
+      this->ViewLogics->RemoveItem(viewLogic);
+      }
+    this->ViewLogics->Delete();
+    }
+  this->ViewLogics = viewLogics;
+  if (this->ViewLogics)
+    {
+    this->ViewLogics->Register(this->ViewLogics);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -90,7 +134,24 @@ QWidget* qMRMLLayoutThreeDViewFactory::createViewFromNode(vtkMRMLAbstractViewNod
   threeDWidget->setMRMLScene(this->mrmlScene());
   vtkMRMLViewNode* threeDViewNode = vtkMRMLViewNode::SafeDownCast(viewNode);
   threeDWidget->setMRMLViewNode(threeDViewNode);
+
+  threeDWidget->setViewLogics(this->viewLogics());
+
+  this->viewLogics()->AddItem(threeDWidget->viewLogic());
+
   return threeDWidget;
+}
+
+//------------------------------------------------------------------------------
+void qMRMLLayoutThreeDViewFactory::deleteView(vtkMRMLAbstractViewNode* viewNode)
+{
+  qMRMLThreeDWidget* threeDWidget =
+    qobject_cast<qMRMLThreeDWidget*>(this->viewWidget(viewNode));
+  if (threeDWidget)
+    {
+    this->viewLogics()->RemoveItem(threeDWidget->viewLogic());
+    }
+  this->Superclass::deleteView(viewNode);
 }
 
 //------------------------------------------------------------------------------
@@ -497,7 +558,7 @@ void qMRMLLayoutManagerPrivate::setMRMLLayoutNode(vtkMRMLLayoutNode* layoutNode)
 }
 
 // --------------------------------------------------------------------------
-void qMRMLLayoutManagerPrivate::setActiveMRMLThreeDViewNode(vtkMRMLViewNode * node)
+void qMRMLLayoutManagerPrivate::setActiveMRMLThreeDViewNode(vtkMRMLViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   QObject::connect(q->mrmlViewFactory("vtkMRMLViewNode"),
@@ -510,7 +571,7 @@ void qMRMLLayoutManagerPrivate::setActiveMRMLThreeDViewNode(vtkMRMLViewNode * no
 
 // --------------------------------------------------------------------------
 void qMRMLLayoutManagerPrivate
-::onActiveThreeDViewNodeChanged(vtkMRMLAbstractViewNode * node)
+::onActiveThreeDViewNodeChanged(vtkMRMLAbstractViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   emit q->activeThreeDRendererChanged(
@@ -520,7 +581,7 @@ void qMRMLLayoutManagerPrivate
 }
 
 // --------------------------------------------------------------------------
-void qMRMLLayoutManagerPrivate::setActiveMRMLChartViewNode(vtkMRMLChartViewNode * node)
+void qMRMLLayoutManagerPrivate::setActiveMRMLChartViewNode(vtkMRMLChartViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   QObject::connect(q->mrmlViewFactory("vtkMRMLChartViewNode"),
@@ -532,7 +593,7 @@ void qMRMLLayoutManagerPrivate::setActiveMRMLChartViewNode(vtkMRMLChartViewNode 
 
 // --------------------------------------------------------------------------
 void qMRMLLayoutManagerPrivate
-::onActiveChartViewNodeChanged(vtkMRMLAbstractViewNode * node)
+::onActiveChartViewNodeChanged(vtkMRMLAbstractViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   emit q->activeChartRendererChanged(
@@ -542,7 +603,7 @@ void qMRMLLayoutManagerPrivate
 }
 
 // --------------------------------------------------------------------------
-void qMRMLLayoutManagerPrivate::setActiveMRMLTableViewNode(vtkMRMLTableViewNode * node)
+void qMRMLLayoutManagerPrivate::setActiveMRMLTableViewNode(vtkMRMLTableViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   QObject::connect(q->mrmlViewFactory("vtkMRMLTableViewNode"),
@@ -554,7 +615,7 @@ void qMRMLLayoutManagerPrivate::setActiveMRMLTableViewNode(vtkMRMLTableViewNode 
 
 // --------------------------------------------------------------------------
 void qMRMLLayoutManagerPrivate
-::onActiveTableViewNodeChanged(vtkMRMLAbstractViewNode * node)
+::onActiveTableViewNodeChanged(vtkMRMLAbstractViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   emit q->activeTableRendererChanged(
@@ -564,7 +625,7 @@ void qMRMLLayoutManagerPrivate
 }
 
 // --------------------------------------------------------------------------
-void qMRMLLayoutManagerPrivate::setActiveMRMLPlotViewNode(vtkMRMLPlotViewNode *node)
+void qMRMLLayoutManagerPrivate::setActiveMRMLPlotViewNode(vtkMRMLPlotViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   QObject::connect(q->mrmlViewFactory("vtkMRMLPlotViewNode"),
@@ -576,7 +637,7 @@ void qMRMLLayoutManagerPrivate::setActiveMRMLPlotViewNode(vtkMRMLPlotViewNode *n
 
 // --------------------------------------------------------------------------
 void qMRMLLayoutManagerPrivate::
-onActivePlotViewNodeChanged(vtkMRMLAbstractViewNode * node)
+onActivePlotViewNodeChanged(vtkMRMLAbstractViewNode* node)
 {
   Q_Q(qMRMLLayoutManager);
   emit q->activePlotRendererChanged(
@@ -641,7 +702,7 @@ void qMRMLLayoutManagerPrivate::onNodeRemovedEvent(vtkObject* scene, vtkObject* 
   Q_ASSERT(scene);
   Q_ASSERT(scene == this->MRMLScene);
   // Layout node
-  vtkMRMLLayoutNode * layoutNode = vtkMRMLLayoutNode::SafeDownCast(node);
+  vtkMRMLLayoutNode* layoutNode = vtkMRMLLayoutNode::SafeDownCast(node);
   if (layoutNode)
     {
     // The layout to be removed should be the same as the stored one
@@ -1051,6 +1112,18 @@ vtkCollection* qMRMLLayoutManager::mrmlSliceLogics()const
 }
 
 //------------------------------------------------------------------------------
+vtkCollection *qMRMLLayoutManager::mrmlViewLogics() const
+{
+  qMRMLLayoutThreeDViewFactory* viewFactory =
+    qobject_cast<qMRMLLayoutThreeDViewFactory*>(this->mrmlViewFactory("vtkMRMLViewNode"));
+  if (!viewFactory)
+    {
+    return NULL;
+    }
+  return viewFactory->viewLogics();
+}
+
+//------------------------------------------------------------------------------
 void qMRMLLayoutManager::setMRMLColorLogic(vtkMRMLColorLogic* colorLogic)
 {
   qMRMLLayoutChartViewFactory* viewChartFactory =
@@ -1235,7 +1308,7 @@ void qMRMLLayoutManager::resetThreeDViews()
 {
   for(int idx = 0; idx < this->threeDViewCount(); ++idx)
     {
-    qMRMLThreeDView * threeDView = this->threeDWidget(idx)->threeDView();
+    qMRMLThreeDView* threeDView = this->threeDWidget(idx)->threeDView();
     threeDView->resetFocalPoint();
     threeDView->resetCamera();
     }

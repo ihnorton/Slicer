@@ -51,7 +51,9 @@ public:
   bool CalculateOversamplingFactor();
 
   /// Apply oversampling factor on image data geometry.
-  /// Changes spacing and extent of oversampling factor is not 1 (and sensible)
+  /// Changes spacing and extent of oversampling factor is not 1 (and between 0.01 - 100.0).
+  /// Larger value results larger resulting image extent (and finer resolution).
+  /// Does not allocate memory, just updates geometry.
   static void ApplyOversamplingOnImageGeometry(vtkOrientedImageData* imageData, double oversamplingFactor);
 
 protected:

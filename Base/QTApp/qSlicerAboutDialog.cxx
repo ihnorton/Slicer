@@ -21,27 +21,27 @@
 // Qt includes
 
 // SlicerApp includes
-#include "qSlicerAppAboutDialog.h"
+#include "qSlicerAboutDialog.h"
 #include "qSlicerApplication.h"
-#include "ui_qSlicerAppAboutDialog.h"
+#include "ui_qSlicerAboutDialog.h"
 
 //-----------------------------------------------------------------------------
-class qSlicerAppAboutDialogPrivate: public Ui_qSlicerAppAboutDialog
+class qSlicerAboutDialogPrivate: public Ui_qSlicerAboutDialog
 {
 public:
 };
 
 //-----------------------------------------------------------------------------
-// qSlicerAppAboutDialogPrivate methods
+// qSlicerAboutDialogPrivate methods
 
 
 //-----------------------------------------------------------------------------
-// qSlicerAppAboutDialog methods
-qSlicerAppAboutDialog::qSlicerAppAboutDialog(QWidget* parentWidget)
+// qSlicerAboutDialog methods
+qSlicerAboutDialog::qSlicerAboutDialog(QWidget* parentWidget)
  :QDialog(parentWidget)
-  , d_ptr(new qSlicerAppAboutDialogPrivate)
+  , d_ptr(new qSlicerAboutDialogPrivate)
 {
-  Q_D(qSlicerAppAboutDialog);
+  Q_D(qSlicerAboutDialog);
   d->setupUi(this);
 
   qSlicerApplication* slicer = qSlicerApplication::application();
@@ -49,16 +49,16 @@ qSlicerAppAboutDialog::qSlicerAppAboutDialog(QWidget* parentWidget)
   d->CreditsTextBrowser->append(slicer->applicationName());
   d->CreditsTextBrowser->setFontPointSize(11);
   d->CreditsTextBrowser->append("");
-  d->CreditsTextBrowser->append(
-    slicer->applicationVersion()+ " "
-    + "r" + slicer->repositoryRevision());
+  d->CreditsTextBrowser->append(slicer->applicationVersion()+ " " + "r" + slicer->repositoryRevision());
   d->CreditsTextBrowser->append("");
-  d->CreditsTextBrowser->append("");
-  d->CreditsTextBrowser->insertHtml("<a href=\"http://download.slicer.org/\">Download</a> a newer version<br />");
-  d->CreditsTextBrowser->append("");
+  if (slicer->mainApplicationName() == QLatin1String("Slicer"))
+    {
+    d->CreditsTextBrowser->append("");
+    d->CreditsTextBrowser->insertHtml("<a href=\"http://download.slicer.org/\">Download</a> a newer version<br />");
+    d->CreditsTextBrowser->append("");
+    }
   d->CreditsTextBrowser->insertHtml(slicer->acknowledgment());
   d->CreditsTextBrowser->insertHtml(slicer->libraries());
-  //d->SlicerLinksTable->setIndexWidget(QModelIndex(), new QTextBrowser);
   d->SlicerLinksTextBrowser->insertHtml(slicer->copyrights());
   d->CreditsTextBrowser->moveCursor(QTextCursor::Start, QTextCursor::MoveAnchor);
 
@@ -66,6 +66,13 @@ qSlicerAppAboutDialog::qSlicerAppAboutDialog(QWidget* parentWidget)
 }
 
 //-----------------------------------------------------------------------------
-qSlicerAppAboutDialog::~qSlicerAppAboutDialog()
+void qSlicerAboutDialog::setLogo(const QPixmap& newLogo)
+{
+  Q_D(qSlicerAboutDialog);
+  d->SlicerLabel->setPixmap(newLogo);
+}
+
+//-----------------------------------------------------------------------------
+qSlicerAboutDialog::~qSlicerAboutDialog()
 {
 }

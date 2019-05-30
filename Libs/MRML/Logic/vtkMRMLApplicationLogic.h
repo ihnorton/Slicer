@@ -35,6 +35,8 @@ class vtkMRMLSelectionNode;
 class vtkMRMLStorableNode;
 class vtkMRMLStorageNode;
 class vtkMRMLInteractionNode;
+class vtkMRMLViewLogic;
+class vtkMRMLViewNode;
 
 // VTK includes
 class vtkCollection;
@@ -53,10 +55,10 @@ public:
   vtkTypeMacro(vtkMRMLApplicationLogic, vtkMRMLAbstractLogic);
 
   /// Get current Selection node
-  vtkMRMLSelectionNode * GetSelectionNode()const;
+  vtkMRMLSelectionNode* GetSelectionNode()const;
 
   /// Get current Interaction node
-  vtkMRMLInteractionNode * GetInteractionNode()const;
+  vtkMRMLInteractionNode* GetInteractionNode()const;
 
   /// All the slice logics in the application
   void SetSliceLogics(vtkCollection* sliceLogics);
@@ -65,6 +67,12 @@ public:
   vtkMRMLSliceLogic* GetSliceLogicByLayoutName(const char* layoutName) const;
   /// Get slice logic from slice model display node
   vtkMRMLSliceLogic* GetSliceLogicByModelDisplayNode(vtkMRMLModelDisplayNode* displayNode) const;
+
+  /// All the view logics in the application
+  void SetViewLogics(vtkCollection* viewLogics);
+  vtkCollection* GetViewLogics()const;
+  vtkMRMLViewLogic* GetViewLogic(vtkMRMLViewNode* viewNode) const;
+  vtkMRMLViewLogic* GetViewLogicByLayoutName(const char* layoutName) const;
 
   /// Get ModelHierarchyLogic
   vtkMRMLModelHierarchyLogic* GetModelHierarchyLogic() const;
@@ -133,11 +141,11 @@ public:
 
   /// zip the directory into a zip file
   /// Returns success or failure.
-  bool Zip(const char *zipFileName, const char *directoryToZip);
+  bool Zip(const char* zipFileName, const char* directoryToZip);
 
   /// unzip the zip file to the current working directory
   /// Returns success or failure.
-  bool Unzip(const char *zipFileName, const char *destinationDirectory);
+  bool Unzip(const char* zipFileName, const char* destinationDirectory);
 
   /// Convert reserved characters into percent notation to avoid issues with filenames
   /// containing things that might be mistaken, for example, for
@@ -148,32 +156,36 @@ public:
   /// or similar should be used, but nothing seems to be available.
   /// http://en.wikipedia.org/wiki/Percent-encoding
   /// See http://na-mic.org/Bug/view.php?id=2605
-  std::string PercentEncode(std::string s);
+  static std::string PercentEncode(std::string s);
 
   /// Save the scene into a self contained directory, sdbDir
   /// Called by the qSlicerSceneWriter, which can be accessed via
   /// \sa qSlicerCoreIOManager::saveScene
   /// If screenShot is not null, use it as the screen shot for a scene view
   /// Returns false if the save failed
-  bool SaveSceneToSlicerDataBundleDirectory(const char *sdbDir, vtkImageData *screenShot = NULL);
+  bool SaveSceneToSlicerDataBundleDirectory(const char* sdbDir, vtkImageData* screenShot = NULL);
 
   /// Open the file into a temp directory and load the scene file
   /// inside.  Note that the first mrml file found in the extracted
   /// directory will be used.
-  bool OpenSlicerDataBundle(const char *sdbFilePath, const char *temporaryDirectory);
+  bool OpenSlicerDataBundle(const char* sdbFilePath, const char* temporaryDirectory);
 
   /// Unpack the file into a temp directory and return the scene file
   /// inside.  Note that the first mrml file found in the extracted
   /// directory will be used.
-  std::string UnpackSlicerDataBundle(const char *sdbFilePath, const char *temporaryDirectory);
+  std::string UnpackSlicerDataBundle(const char* sdbFilePath, const char* temporaryDirectory);
 
   /// Load any default parameter sets into the specified scene
   /// Returns the total number of loaded parameter sets
-  static int LoadDefaultParameterSets(vtkMRMLScene * scene,
+  static int LoadDefaultParameterSets(vtkMRMLScene* scene,
                                       const std::vector<std::string>& directories);
 
-  /// Creates a unique non-existant file name by adding an index after base file name.
-  static std::string CreateUniqueFileName(std::string &filename);
+  /// Creates a unique (non-existent) file name by adding an index after base file name.
+  /// knownExtension specifies the extension the index should be inserted before.
+  /// It is necessary to provide extension, because there is no reliable way of correctly
+  /// determining extension automatically (for example, file extension of some.file.nii.gz
+  /// could be gz, nii.gz, or file.nii.gz and only one of them is correct).
+  static std::string CreateUniqueFileName(const std::string &filename, const std::string& knownExtension="");
 
   /// List of custom events fired by the class.
   enum Events{
@@ -203,6 +215,10 @@ public:
   /// Set the temporary path the logics can use. The path should be set by the application
   void SetTemporaryPath(const char* path);
 
+  /// Saves the provided image as screenshot of the scene (same filepath as the scene URL but extension is .png instead of .mrml).
+  /// Uses current scene's URL property, so the URL must be up-to-date when calling this method.
+  void SaveSceneScreenshot(vtkImageData* screenshot);
+
 protected:
 
   vtkMRMLApplicationLogic();
@@ -213,14 +229,11 @@ protected:
   void SetSelectionNode(vtkMRMLSelectionNode* );
   void SetInteractionNode(vtkMRMLInteractionNode* );
 
-  void SaveStorableNodeToSlicerDataBundleDirectory(vtkMRMLStorableNode *storableNode,
+  void SaveStorableNodeToSlicerDataBundleDirectory(vtkMRMLStorableNode* storableNode,
                                                  std::string &dataDir);
-
-
 
 private:
 
-  std::map<vtkMRMLStorageNode*, std::string> OriginalStorageNodeDirs;
   /// use a map to store the file names from a storage node, the 0th one is by
   /// definition the GetFileName returned value, then the rest are at index n+1
   /// from GetNthFileName(n)

@@ -902,7 +902,12 @@ void qSlicerCoreApplication::handleCommandLineArguments()
 
     // Set 'sys.executable' so that Slicer can be used as a "regular" python interpreter
     this->corePythonManager()->executeString(
-          QString("import sys; sys.executable = '%1'; del sys").arg(this->applicationFilePath()));
+          #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+          QString("import sys; sys.executable = '%1'; del sys").arg(QStandardPaths::findExecutable("PythonSlicer"))
+          #else
+          QString("import sys, distutils.spawn; sys.executable = distutils.spawn.find_executable('PythonSlicer'); del sys, distutils")
+          #endif
+          );
 
     // Clean memory
     for(int i = 0; i < pythonArgc; ++i){ delete[] pythonArgv[i];}
@@ -1354,6 +1359,12 @@ qSlicerCoreCommandOptions* qSlicerCoreApplication::coreCommandOptions()const
 {
   Q_D(const qSlicerCoreApplication);
   return d->CoreCommandOptions.data();
+}
+
+//-----------------------------------------------------------------------------
+QString qSlicerCoreApplication::mainApplicationName()const
+{
+  return QString(Slicer_MAIN_PROJECT_APPLICATION_NAME);
 }
 
 //-----------------------------------------------------------------------------

@@ -400,7 +400,7 @@ void qSlicerSaveDataDialogPrivate::populateScene()
   this->updateOptionsWidget(row);
 
   // Set current scene file format based on last successful scene save
-  int lastFormatIndex = sceneComboBoxWidget->findText(this->LastMRMLSceneFileFormat);
+  int lastFormatIndex = sceneComboBoxWidget->findText(coreIOManager->defaultSceneFileType());
   if (lastFormatIndex != -1)
     {
     sceneComboBoxWidget->setCurrentIndex(lastFormatIndex);
@@ -549,8 +549,8 @@ QFileInfo qSlicerSaveDataDialogPrivate::nodeFileInfo(vtkMRMLStorableNode* node)
         {
         QFileInfo existingInfo(snode->GetFileName());
         std::string extension = snode->GetSupportedFileExtension();
-        QFileInfo newInfo(existingInfo.absoluteDir(), safeNodeName + QString(extension.c_str()));
-        snode->SetFileName(newInfo.absoluteFilePath().toLatin1());
+        QFileInfo newInfo(existingInfo.path(), safeNodeName + QString(extension.c_str()));
+        snode->SetFileName(newInfo.filePath().toLatin1());
         node->StorableModified();
         }
       }
@@ -1142,7 +1142,12 @@ bool qSlicerSaveDataDialogPrivate::saveScene()
 
   if (res)
     {
-    this->LastMRMLSceneFileFormat = this->sceneFileFormat();
+    qSlicerCoreIOManager* coreIOManager = qSlicerCoreApplication::application()->coreIOManager();
+    Q_ASSERT(coreIOManager);
+    if (coreIOManager)
+      {
+      coreIOManager->setDefaultSceneFileType(this->sceneFileFormat());
+      }
     }
   else
     {

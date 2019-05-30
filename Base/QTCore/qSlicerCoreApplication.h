@@ -87,6 +87,7 @@ class Q_SLICER_BASE_QTCORE_EXPORT qSlicerCoreApplication : public QApplication
   Q_PROPERTY(QString platform READ platform CONSTANT)
   Q_PROPERTY(QString arch READ arch CONSTANT)
   Q_PROPERTY(QString os READ os CONSTANT)
+  Q_PROPERTY(QString mainApplicationName READ mainApplicationName CONSTANT)
 public:
 
   typedef QApplication Superclass;
@@ -336,6 +337,9 @@ public:
   /// \sa slicerRevisionSpecificUserSettingsFilePath()
   Q_INVOKABLE QSettings* revisionUserSettings()const;
 
+  /// \brief Return the name of the main application.
+  QString mainApplicationName()const;
+
   /// Return the copyrights of Slicer
   virtual QString copyrights()const;
 
@@ -345,17 +349,18 @@ public:
   /// Return the libraries of Slicer
   virtual QString libraries()const;
 
-  /// Return the source repository URL associated to this build
+  /// Return the Slicer source repository URL associated with this build
   /// \sa qSlicerCoreApplicationPrivate::discoverRepository
   QString repositoryUrl()const;
 
-  /// Return the source repository Branch associated to this build
+  /// Return the Slicer source repository Branch associated with this build
   /// \sa qSlicerCoreApplicationPrivate::discoverRepository
   QString repositoryBranch()const;
 
-  /// Return the source repository Revision associated to this build
+  /// Return the Slicer source repository Revision associated with this build
   /// \sa qSlicerCoreApplicationPrivate::discoverRepository
   QString repositoryRevision()const;
+
 
   /// Return the Slicer major version number
   int majorVersion() const;

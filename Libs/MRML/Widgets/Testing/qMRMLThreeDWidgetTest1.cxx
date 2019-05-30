@@ -27,6 +27,7 @@
 
 // qMRML includes
 #include "qMRMLThreeDWidget.h"
+#include "qMRMLThreeDViewControllerWidget.h"
 
 // MRML includes
 #include <vtkMRMLInteractionNode.h>
@@ -37,6 +38,7 @@
 // VTK includes
 #include <vtkNew.h>
 #ifdef Slicer_VTK_USE_QVTKOPENGLWIDGET
+#include <QSurfaceFormat>
 #include <QVTKOpenGLWidget.h>
 #endif
 
@@ -68,6 +70,7 @@ int qMRMLThreeDWidgetTest1(int argc, char * argv [] )
   vtkNew<vtkMRMLViewNode> viewNode;
   scene->AddNode(viewNode.GetPointer());
 
+  widget.setViewLabel("View1");
   widget.setMRMLScene(scene.GetPointer());
   widget.setMRMLViewNode(viewNode.GetPointer());
 

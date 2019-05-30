@@ -228,9 +228,9 @@ qSlicerSegmentEditorPaintEffectPrivate::qSlicerSegmentEditorPaintEffectPrivate(q
   , BrushDiameterSlider(NULL)
   , BrushDiameterRelativeToggle(NULL)
   , BrushSphereCheckbox(NULL)
+  , EditIn3DViewsCheckbox(NULL)
   , ColorSmudgeCheckbox(NULL)
   , EraseAllSegmentsCheckbox(NULL)
-  , EditIn3DViewsCheckbox(NULL)
   , BrushPixelModeCheckbox(NULL)
 {
   this->PaintCoordinates_World = vtkSmartPointer<vtkPoints>::New();
@@ -889,7 +889,7 @@ std::string qSlicerSegmentEditorPaintEffectPrivate::segmentAtPosition(qMRMLWidge
   vtkObject* displayableManager = NULL;
   vtkMRMLSegmentationsDisplayableManager2D* segmentationDisplayableManager2D = NULL;
   for (displayableManagerCollection->InitTraversal(it);
-   displayableManager = displayableManagerCollection->GetNextItemAsObject(it);)
+       (displayableManager = displayableManagerCollection->GetNextItemAsObject(it));)
     {
     segmentationDisplayableManager2D = vtkMRMLSegmentationsDisplayableManager2D::SafeDownCast(displayableManager);
     if (segmentationDisplayableManager2D)

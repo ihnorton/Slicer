@@ -37,13 +37,18 @@
 #include "qMRMLViewControllerBar_p.h"
 #include "ui_qMRMLThreeDViewControllerWidget.h"
 
+// MRMLLogic includes
+#include <vtkMRMLViewLogic.h>
+
 // VTK includes
+#include <vtkSmartPointer.h>
 #include <vtkWeakPointer.h>
 
 class QAction;
 class ctkButtonGroup;
 class ctkSignalMapper;
 class qMRMLSceneViewMenu;
+class vtkMRMLCameraNode;
 class vtkMRMLViewNode;
 class QString;
 
@@ -60,17 +65,23 @@ public:
 
   virtual void init();
 
-  vtkWeakPointer<vtkMRMLViewNode>  ViewNode;
-  qMRMLThreeDView*                 ThreeDView;
+  vtkMRMLViewLogic* viewNodeLogic(vtkMRMLViewNode* node);
 
-  ctkSignalMapper*                 StereoTypesMapper;
-  ctkButtonGroup*                  AnimateViewButtonGroup;
-  ctkSignalMapper*                 OrientationMarkerTypesMapper;
-  ctkSignalMapper*                 OrientationMarkerSizesMapper;
-  ctkSignalMapper*                 RulerTypesMapper;
+  vtkWeakPointer<vtkMRMLViewNode>     ViewNode;
+  vtkWeakPointer<vtkMRMLCameraNode>   CameraNode;
+  qMRMLThreeDView*                    ThreeDView;
 
-  QString                          ThreeDViewLabel;
-  QToolButton*                     CenterToolButton;
+  vtkSmartPointer<vtkMRMLViewLogic>   ViewLogic;
+  vtkCollection*                      ViewLogics;
+
+  ctkSignalMapper*                    StereoTypesMapper;
+  ctkButtonGroup*                     AnimateViewButtonGroup;
+  ctkSignalMapper*                    OrientationMarkerTypesMapper;
+  ctkSignalMapper*                    OrientationMarkerSizesMapper;
+  ctkSignalMapper*                    RulerTypesMapper;
+
+  QString                             ThreeDViewLabel;
+  QToolButton*                        CenterToolButton;
 
 protected:
   virtual void setupPopupUi();

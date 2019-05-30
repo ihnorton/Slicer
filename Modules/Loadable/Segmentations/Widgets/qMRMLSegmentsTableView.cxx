@@ -33,7 +33,6 @@
 
 // Terminologies includes
 #include "qSlicerTerminologyItemDelegate.h"
-#include "qSlicerTerminologyNavigatorWidget.h"
 #include "vtkSlicerTerminologiesModuleLogic.h"
 #include "vtkSlicerTerminologyEntry.h"
 #include "vtkSlicerTerminologyCategory.h"
@@ -43,12 +42,16 @@
 #include <vtkMRMLScene.h>
 #include <vtkMRMLLabelMapVolumeNode.h>
 #include <vtkMRMLModelNode.h>
+#include <vtkMRMLSliceNode.h>
 
 // SlicerQt includes
+#include <qSlicerApplication.h>
 #include <qSlicerCoreApplication.h>
+#include <qSlicerLayoutManager.h>
 #include <qSlicerModuleManager.h>
 #include <qSlicerAbstractCoreModule.h>
 #include <qMRMLItemDelegate.h>
+#include <qMRMLSliceWidget.h>
 
 // VTK includes
 #include <vtkWeakPointer.h>
@@ -1054,6 +1057,12 @@ void qMRMLSegmentsTableView::contextMenuEvent(QContextMenuEvent* event)
 
   contextMenu->addSeparator();
 
+  QAction* jumpSlicesAction = new QAction("Jump slices", this);
+  QObject::connect(jumpSlicesAction, SIGNAL(triggered()), this, SLOT(jumpSlices()));
+  contextMenu->addAction(jumpSlicesAction);
+
+  contextMenu->addSeparator();
+
   QAction* moveUpAction = new QAction("Move segment up", this);
   QObject::connect(moveUpAction, SIGNAL(triggered()), this, SLOT(moveSelectedSegmentsUp()));
   contextMenu->addAction(moveUpAction);
@@ -1103,6 +1112,63 @@ void qMRMLSegmentsTableView::showOnlySelectedSegments()
     displayNode->SetSegmentVisibility(segmentId.toLatin1().constData(), visible);
     }
   displayNode->EndModify(disabledModify);
+}
+
+//------------------------------------------------------------------------------
+void qMRMLSegmentsTableView::jumpSlices()
+{
+  QStringList selectedSegmentIDs = this->selectedSegmentIDs();
+  if (selectedSegmentIDs.size() == 0)
+    {
+    qWarning() << Q_FUNC_INFO << ": No segment selected";
+    return;
+    }
+
+  Q_D(qMRMLSegmentsTableView);
+  if (!d->SegmentationNode)
+    {
+    qCritical() << Q_FUNC_INFO << ": No current segmentation node";
+    return;
+    }
+
+  double* segmentCenterPosition = d->SegmentationNode->GetSegmentCenterRAS(selectedSegmentIDs[0].toLatin1().constData());
+  if (!segmentCenterPosition)
+    {
+    return;
+    }
+
+  qSlicerLayoutManager* layoutManager = qSlicerApplication::application()->layoutManager();
+  if (!layoutManager)
+    {
+    // application is closing
+    return;
+    }
+  foreach(QString sliceViewName, layoutManager->sliceViewNames())
+    {
+    // Check if segmentation is visible in this view
+    qMRMLSliceWidget* sliceWidget = layoutManager->sliceWidget(sliceViewName);
+    vtkMRMLSliceNode* sliceNode = sliceWidget->mrmlSliceNode();
+    if (!sliceNode || !sliceNode->GetID())
+      {
+      continue;
+      }
+    bool visibleInView = false;
+    int numberOfDisplayNodes = d->SegmentationNode->GetNumberOfDisplayNodes();
+    for (int displayNodeIndex = 0; displayNodeIndex < numberOfDisplayNodes; displayNodeIndex++)
+      {
+      vtkMRMLDisplayNode* segmentationDisplayNode = d->SegmentationNode->GetNthDisplayNode(displayNodeIndex);
+      if (segmentationDisplayNode->IsDisplayableInView(sliceNode->GetID()))
+        {
+        visibleInView = true;
+        break;
+        }
+      }
+    if (!visibleInView)
+      {
+      continue;
+      }
+    sliceNode->JumpSliceByCentering(segmentCenterPosition[0], segmentCenterPosition[1], segmentCenterPosition[2]);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -1195,7 +1261,7 @@ QString qMRMLSegmentsTableView::terminologyTooltipForSegment(vtkSegment* segment
     {
     qCritical() << Q_FUNC_INFO << ": Terminologies module is not found";
     return QString();
-    } 
+    }
 
   std::string serializedTerminology("");
   if (!segment->GetTag(vtkSegment::GetTerminologyEntryTagName(), serializedTerminology))

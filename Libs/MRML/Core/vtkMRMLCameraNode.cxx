@@ -53,6 +53,9 @@ vtkMRMLCameraNode::vtkMRMLCameraNode()
   this->SetAndObserveCamera(camera.GetPointer());
 
   this->AppliedTransform = vtkMatrix4x4::New();
+
+  this->Interacting = 0;
+  this->InteractionFlags = 0;
  }
 
 //----------------------------------------------------------------------------
@@ -135,7 +138,7 @@ void vtkMRMLCameraNode::ReadXMLAttributes(const char** atts)
       // to link to the main viewer
       if (!this->GetActiveTag() && this->Scene)
         {
-        vtkMRMLViewNode *vnode = vtkMRMLViewNode::SafeDownCast(
+        vtkMRMLViewNode* vnode = vtkMRMLViewNode::SafeDownCast(
           this->Scene->GetFirstNodeByClass("vtkMRMLViewNode"));
         if (vnode)
         {
@@ -166,7 +169,7 @@ void vtkMRMLCameraNode::ReadXMLAttributes(const char** atts)
 //----------------------------------------------------------------------------
 // Copy the node's attributes to this object.
 // Does NOT copy: ID, FilePrefix, Name, ID
-void vtkMRMLCameraNode::Copy(vtkMRMLNode *anode)
+void vtkMRMLCameraNode::Copy(vtkMRMLNode* anode)
 {
   int disabledModify = this->StartModify();
 
@@ -181,7 +184,7 @@ void vtkMRMLCameraNode::Copy(vtkMRMLNode *anode)
   vtkMRMLCopyFloatMacro(ViewAngle);
   vtkMRMLCopyEndMacro();
 
-  vtkMRMLCameraNode *node = vtkMRMLCameraNode::SafeDownCast(anode);
+  vtkMRMLCameraNode* node = vtkMRMLCameraNode::SafeDownCast(anode);
   if (node)
     {
     this->AppliedTransform->DeepCopy(node->GetAppliedTransform());
@@ -214,6 +217,7 @@ void vtkMRMLCameraNode::PrintSelf(ostream& os, vtkIndent indent)
   vtkMRMLPrintFloatMacro(ParallelScale);
   vtkMRMLPrintFloatMacro(ViewAngle);
   vtkMRMLPrintStringMacro(ActiveTag);
+  vtkMRMLPrintIntMacro(Interacting);
   vtkMRMLPrintEndMacro();
 
   os << indent << "AppliedTransform: " ;
@@ -221,7 +225,7 @@ void vtkMRMLCameraNode::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLCameraNode::SetAndObserveCamera(vtkCamera *camera)
+void vtkMRMLCameraNode::SetAndObserveCamera(vtkCamera* camera)
 {
   if (this->Camera != NULL)
     {
@@ -266,7 +270,7 @@ void vtkMRMLCameraNode::SetPosition(double position[3])
 }
 
 //---------------------------------------------------------------------------
-double *vtkMRMLCameraNode::GetPosition()
+double* vtkMRMLCameraNode::GetPosition()
 {
   return this->Camera->GetPosition();
 }
@@ -284,7 +288,7 @@ void vtkMRMLCameraNode::SetFocalPoint(double focalPoint[3])
 }
 
 //---------------------------------------------------------------------------
-double *vtkMRMLCameraNode::GetFocalPoint()
+double* vtkMRMLCameraNode::GetFocalPoint()
 {
   return this->Camera->GetFocalPoint();
 }
@@ -302,7 +306,7 @@ void vtkMRMLCameraNode::SetViewUp(double viewUp[3])
 }
 
 //---------------------------------------------------------------------------
-double *vtkMRMLCameraNode::GetViewUp()
+double* vtkMRMLCameraNode::GetViewUp()
 {
   return this->Camera->GetViewUp();
 }
@@ -326,20 +330,20 @@ double vtkMRMLCameraNode::GetViewAngle()
 }
 
 //---------------------------------------------------------------------------
-void vtkMRMLCameraNode::ProcessMRMLEvents ( vtkObject *caller,
+void vtkMRMLCameraNode::ProcessMRMLEvents ( vtkObject* caller,
                                             unsigned long event,
-                                            void *callData )
+                                            void* callData )
 {
   Superclass::ProcessMRMLEvents(caller, event, callData);
 
   if (this->Camera != NULL &&
       this->Camera == vtkCamera::SafeDownCast(caller) &&
-      event ==  vtkCommand::ModifiedEvent)
+      event == vtkCommand::ModifiedEvent)
     {
     this->Modified();
     }
 
-  vtkMRMLTransformNode *tnode = this->GetParentTransformNode();
+  vtkMRMLTransformNode* tnode = this->GetParentTransformNode();
   if (this->Camera != NULL &&
       tnode == vtkMRMLTransformNode::SafeDownCast(caller) &&
       event == vtkMRMLTransformableNode::TransformModifiedEvent)
@@ -417,7 +421,7 @@ void vtkMRMLCameraNode::UpdateReferences()
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLCameraNode::UpdateReferenceID(const char *oldID, const char *newID)
+void vtkMRMLCameraNode::UpdateReferenceID(const char* oldID, const char* newID)
 {
   this->Superclass::UpdateReferenceID(oldID, newID);
   if (this->GetActiveTag() && !strcmp(oldID, this->GetActiveTag()))
@@ -433,7 +437,7 @@ const char* vtkMRMLCameraNode::GetActiveTag()
 }
 
 //---------------------------------------------------------------------------
-void vtkMRMLCameraNode::SetActiveTag(const char *_arg)
+void vtkMRMLCameraNode::SetActiveTag(const char* _arg)
 {
   if (this->GetActiveTag() == NULL && _arg == NULL)
     {
@@ -456,7 +460,7 @@ void vtkMRMLCameraNode::SetActiveTag(const char *_arg)
   // their tags to null
   if (this->Scene != NULL && _arg != NULL)
     {
-    vtkMRMLCameraNode *node = NULL;
+    vtkMRMLCameraNode* node = NULL;
     int nnodes = this->Scene->GetNumberOfNodesByClass("vtkMRMLCameraNode");
     for (int n=0; n<nnodes; n++)
       {
@@ -481,14 +485,14 @@ void vtkMRMLCameraNode::SetActiveTag(const char *_arg)
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLCameraNode* vtkMRMLCameraNode::FindActiveTagInScene(const char *tag)
+vtkMRMLCameraNode* vtkMRMLCameraNode::FindActiveTagInScene(const char* tag)
 {
   if (this->Scene == NULL || tag == NULL)
     {
     return NULL;
     }
 
-  vtkMRMLCameraNode *node = NULL;
+  vtkMRMLCameraNode* node = NULL;
   int nnodes = this->Scene->GetNumberOfNodesByClass("vtkMRMLCameraNode");
   for (int n=0; n<nnodes; n++)
     {
@@ -688,4 +692,18 @@ void vtkMRMLCameraNode::Reset(bool resetRotation,
     renderer->UpdateLightsGeometryToFollowCamera();
     }
   this->EndModify(wasModifying);
+}
+
+//-----------------------------------------------------------
+void vtkMRMLCameraNode::SetInteracting(int interacting)
+{
+  // Don't call Modified()
+  this->Interacting = interacting;
+}
+
+//-----------------------------------------------------------
+void vtkMRMLCameraNode::SetInteractionFlags(unsigned int flags)
+{
+  // Don't call Modified()
+  this->InteractionFlags = flags;
 }

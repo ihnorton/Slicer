@@ -42,7 +42,7 @@ class QTableWidgetItem;
 class QItemSelection;
 class QContextMenuEvent;
 
-/// \ingroup SlicerRt_QtModules_Segmentations_Widgets
+/// \ingroup Slicer_QtModules_Segmentations_Widgets
 class Q_SLICER_MODULE_SEGMENTATIONS_WIDGETS_EXPORT qMRMLSegmentsTableView : public qMRMLWidget
 {
   Q_OBJECT
@@ -124,6 +124,10 @@ public slots:
 
   /// Show only selected segments
   void showOnlySelectedSegments();
+
+  /// Jump position of all slice views to show the segment's center.
+  /// Segment's center is determined as the center of bounding box.
+  void jumpSlices();
 
   /// Move selected segments up in the list
   void moveSelectedSegmentsUp();

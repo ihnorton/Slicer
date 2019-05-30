@@ -446,7 +446,8 @@ macro(slicerMacroBuildApplication)
     set(link_flags "-Wl,-rpath,@loader_path/../")
     set_target_properties(${slicerapp_target}
       PROPERTIES
-        MACOSX_BUNDLE_BUNDLE_VERSION "${Slicer_VERSION_FULL}"
+        MACOSX_BUNDLE_BUNDLE_NAME "${SLICERAPP_APPLICATION_NAME} ${Slicer_MAIN_PROJECT_VERSION_FULL}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${Slicer_MAIN_PROJECT_VERSION_FULL}"
         MACOSX_BUNDLE_INFO_PLIST "${Slicer_CMAKE_DIR}/MacOSXBundleInfo.plist.in"
         LINK_FLAGS ${link_flags}
       )
@@ -458,8 +459,16 @@ macro(slicerMacroBuildApplication)
   endif()
 
   get_target_property(_slicerapp_output_dir ${slicerapp_target} RUNTIME_OUTPUT_DIRECTORY)
+  set(_slicerapp_build_subdir "")
 
-  set(SLICERAPP_EXECUTABLE "${_slicerapp_output_dir}/${executable_name}${CMAKE_EXECUTABLE_SUFFIX}")
+  if(APPLE)
+    get_target_property(_is_bundle ${slicerapp_target} MACOSX_BUNDLE)
+    if(_is_bundle)
+      set(_slicerapp_build_subdir "${executable_name}.app/Contents/MacOS/")
+    endif()
+  endif()
+
+  set(SLICERAPP_EXECUTABLE "${_slicerapp_output_dir}/${_slicerapp_build_subdir}${executable_name}${CMAKE_EXECUTABLE_SUFFIX}")
   _set_app_property("EXECUTABLE")
 
   if(WIN32)

@@ -127,7 +127,7 @@ public:
   /// Get the view widget representing a particular node (can be used
   /// for SliceNodes or ViewNodes, returning qMRMLSliceWidget or
   /// qMRMLThreeDWidget respectively).
-  Q_INVOKABLE QWidget* viewWidget(vtkMRMLNode *n) const;
+  Q_INVOKABLE QWidget* viewWidget(vtkMRMLNode* n) const;
 
   /// Get slice view widget identified by \a name
   Q_INVOKABLE qMRMLSliceWidget* sliceWidget(const QString& name)const;
@@ -158,6 +158,10 @@ public:
   /// Return the up-to-date list of vtkMRMLSliceLogics associated to the slice views.
   /// The returned collection object is owned by the layout manager.
   Q_INVOKABLE vtkCollection* mrmlSliceLogics()const;
+
+  /// Return the up-to-date list of vtkMRMLViewLogics associated to the threeD views.
+  /// The returned collection object is owned by the layout manager.
+  Q_INVOKABLE vtkCollection* mrmlViewLogics()const;
 
   Q_INVOKABLE void setMRMLColorLogic(vtkMRMLColorLogic* colorLogic);
   Q_INVOKABLE vtkMRMLColorLogic* mrmlColorLogic()const;
@@ -240,10 +244,10 @@ public slots:
   void resetSliceViews();
 
 signals:
-  void activeMRMLThreeDViewNodeChanged(vtkMRMLViewNode * newActiveMRMLThreeDViewNode);
-  void activeMRMLChartViewNodeChanged(vtkMRMLChartViewNode * newActiveMRMLChartViewNode);
-  void activeMRMLTableViewNodeChanged(vtkMRMLTableViewNode * newActiveMRMLChartViewNode);
-  void activeMRMLPlotViewNodeChanged(vtkMRMLPlotViewNode * newActiveMRMLPlotViewNode);
+  void activeMRMLThreeDViewNodeChanged(vtkMRMLViewNode* newActiveMRMLThreeDViewNode);
+  void activeMRMLChartViewNodeChanged(vtkMRMLChartViewNode* newActiveMRMLChartViewNode);
+  void activeMRMLTableViewNodeChanged(vtkMRMLTableViewNode* newActiveMRMLChartViewNode);
+  void activeMRMLPlotViewNodeChanged(vtkMRMLPlotViewNode* newActiveMRMLPlotViewNode);
   void activeThreeDRendererChanged(vtkRenderer* newRenderer);
   void activeChartRendererChanged(vtkRenderer* newRenderer);
   void activeTableRendererChanged(vtkRenderer* newRenderer);

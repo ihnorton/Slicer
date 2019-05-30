@@ -35,6 +35,9 @@ class qMRMLThreeDWidgetPrivate;
 class vtkMRMLScene;
 class vtkMRMLViewNode;
 
+// MRMLLogic includes
+class vtkMRMLViewLogic;
+
 // VTK includes
 class vtkCollection;
 
@@ -58,6 +61,9 @@ public:
   /// Get the 3D View node observed by view.
   Q_INVOKABLE vtkMRMLViewNode* mrmlViewNode()const;
 
+  /// \sa qMRMLSliceControllerWidget::viewLogic()
+  Q_INVOKABLE vtkMRMLViewLogic* viewLogic()const;
+
   /// Get a reference to the underlying ThreeD View
   /// Becareful if you change the threeDView, you might
   /// unsynchronize the view from the nodes/logics.
@@ -65,7 +71,7 @@ public:
 
   /// \sa qMRMLThreeDView::addDisplayableManager
   Q_INVOKABLE void addDisplayableManager(const QString& displayableManager);
-  Q_INVOKABLE void getDisplayableManagers(vtkCollection *displayableManagers);
+  Q_INVOKABLE void getDisplayableManagers(vtkCollection* displayableManagers);
 
   /// \sa qMRMLThreeDViewControllerWidget::viewLabel()
   /// \sa setiewLabel()
@@ -86,7 +92,12 @@ public:
   /// \sa viewColor()
   void setViewColor(const QColor& newViewColor);
 
+  /// propagates the logics to the qMRMLThreeDControllerWidget
+  Q_INVOKABLE void setViewLogics(vtkCollection* logics);
+
 public slots:
+  void setMRMLScene(vtkMRMLScene* newScene);
+
   /// Set the current \a viewNode to observe
   void setMRMLViewNode(vtkMRMLViewNode* newViewNode);
 

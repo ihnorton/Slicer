@@ -32,6 +32,7 @@
 #include "qSlicerFileWriter.h"
 
 // MRML includes
+#include <vtkMRMLApplicationLogic.h>
 #include <vtkMRMLNode.h>
 #include <vtkMRMLScene.h>
 #include <vtkMRMLStorableNode.h>
@@ -60,6 +61,8 @@ public:
   QList<qSlicerFileReader*> Readers;
   QList<qSlicerFileWriter*> Writers;
   QMap<qSlicerIO::IOFileType, QStringList> FileTypes;
+
+  QString DefaultSceneFileType;
 };
 
 //-----------------------------------------------------------------------------
@@ -575,6 +578,55 @@ void qSlicerCoreIOManager::emitNewFileLoaded(const QVariantMap& loadedFileParame
 }
 
 //-----------------------------------------------------------------------------
+void qSlicerCoreIOManager::addDefaultStorageNodes()
+{
+  Q_D(qSlicerCoreIOManager);
+  int numNodes = d->currentScene()->GetNumberOfNodes();
+  for (int i = 0; i < numNodes; ++i)
+    {
+    vtkMRMLStorableNode* storableNode = vtkMRMLStorableNode::SafeDownCast(d->currentScene()->GetNthNode(i));
+    if (!storableNode)
+      {
+      continue;
+      }
+    if (!storableNode->GetSaveWithScene())
+      {
+      continue;
+      }
+    vtkMRMLStorageNode* storageNode = storableNode->GetStorageNode();
+    if (storageNode)
+      {
+      // this node already has a storage node
+      continue;
+      }
+    storableNode->AddDefaultStorageNode();
+    storageNode = storableNode->GetStorageNode();
+    if (!storageNode)
+      {
+      // no need for storage node to store this node
+      // (some nodes can be saved either into the scene or into a separate file)
+      continue;
+      }
+    std::string fileName(storageNode->GetFileName() ? storageNode->GetFileName() : "");
+    if (!fileName.empty())
+      {
+      // filename is already set
+      continue;
+      }
+    if (!storableNode->GetName())
+      {
+      // no node name is specified, cannot create a default file name
+      continue;
+      }
+    // Default storage node usually has empty file name (if Save dialog is not opened yet)
+    // file name is encoded to handle : or / characters in the node names
+    std::string fileBaseName = vtkMRMLApplicationLogic::PercentEncode(storableNode->GetName());
+    std::string extension = storageNode->GetDefaultWriteFileExtension();
+    std::string storageFileName = fileBaseName + std::string(".") + extension;
+    }
+}
+
+//-----------------------------------------------------------------------------
 bool qSlicerCoreIOManager::saveNodes(qSlicerIO::IOFileType fileType,
                                      const qSlicerIO::IOProperties& parameters)
 {
@@ -714,4 +766,18 @@ void qSlicerCoreIOManager::registerIO(qSlicerIO* io)
     {
     io->setParent(this);
     }
+}
+
+//-----------------------------------------------------------------------------
+QString qSlicerCoreIOManager::defaultSceneFileType()const
+{
+  Q_D(const qSlicerCoreIOManager);
+  return d->DefaultSceneFileType;
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerCoreIOManager::setDefaultSceneFileType(QString fileType)
+{
+  Q_D(qSlicerCoreIOManager);
+  d->DefaultSceneFileType = fileType;
 }

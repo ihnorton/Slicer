@@ -38,11 +38,14 @@
 #include "qMRMLThreeDViewControllerWidget_p.h"
 
 // MRML includes
+#include <vtkMRMLCameraNode.h>
 #include <vtkMRMLScene.h>
-#include <vtkMRMLViewNode.h>
 #include <vtkMRMLSceneViewNode.h>
+#include <vtkMRMLViewNode.h>
 
 // VTK includes
+#include <vtkCollection.h>
+#include <vtkNew.h>
 #include <vtkRenderWindow.h>
 
 //--------------------------------------------------------------------------
@@ -53,7 +56,10 @@ qMRMLThreeDViewControllerWidgetPrivate::qMRMLThreeDViewControllerWidgetPrivate(
   qMRMLThreeDViewControllerWidget& object)
   : Superclass(object)
 {
+  this->ViewLogic = 0;
+  this->ViewLogics = 0;
   this->ViewNode = 0;
+  this->CameraNode = 0;
   this->ThreeDView = 0;
   this->CenterToolButton = 0;
 }
@@ -76,6 +82,10 @@ void qMRMLThreeDViewControllerWidgetPrivate::setupPopupUi()
   QObject::connect(this->AxesWidget,
                    SIGNAL(currentAxisChanged(ctkAxesWidget::Axis)),
                    q, SLOT(lookFromAxis(ctkAxesWidget::Axis)));
+
+  // ResetFocalPoint button
+  QObject::connect(this->ViewLinkButton, SIGNAL(toggled(bool)),
+                   q, SLOT(setViewLink(bool)));
 
   // Orthographic/perspective button
   QObject::connect(this->OrthoButton, SIGNAL(toggled(bool)),
@@ -251,10 +261,34 @@ void qMRMLThreeDViewControllerWidgetPrivate::init()
 
   this->ViewLabel->setText(qMRMLThreeDViewControllerWidget::tr("1"));
   this->BarLayout->addStretch(1);
+
+  vtkNew<vtkMRMLViewLogic> defaultLogic;
+  q->setViewLogic(defaultLogic.GetPointer());
+}
+
+//---------------------------------------------------------------------------
+vtkMRMLViewLogic *qMRMLThreeDViewControllerWidgetPrivate::viewNodeLogic(vtkMRMLViewNode *node)
+{
+  if (!this->ViewLogics)
+    {
+    return NULL;
+    }
+  vtkMRMLViewLogic* logic = NULL;
+  vtkCollectionSimpleIterator it;
+  for (this->ViewLogics->InitTraversal(it);(logic = static_cast<vtkMRMLViewLogic*>(
+                                               this->ViewLogics->GetNextItemAsObject(it)));)
+    {
+    if (logic->GetViewNode() == node)
+      {
+      return logic;
+      }
+    }
+  return NULL;
 }
 
 // --------------------------------------------------------------------------
 // qMRMLThreeDViewControllerWidget methods
+
 
 // --------------------------------------------------------------------------
 qMRMLThreeDViewControllerWidget::qMRMLThreeDViewControllerWidget(QWidget* parentWidget)
@@ -294,6 +328,11 @@ void qMRMLThreeDViewControllerWidget::setViewLabel(const QString& newViewLabel)
 
   d->ThreeDViewLabel = newViewLabel;
   d->ViewLabel->setText(d->ThreeDViewLabel);
+
+  if (d->ViewLogic)
+    {
+    d->ViewLogic->SetName(newViewLabel.toLatin1());
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -306,13 +345,43 @@ void qMRMLThreeDViewControllerWidget::setMRMLViewNode(
 {
   Q_D(qMRMLThreeDViewControllerWidget);
   this->qvtkReconnect(d->ViewNode, viewNode, vtkCommand::ModifiedEvent,
-                      this, SLOT(updateWidgetFromMRML()));
+                      this, SLOT(updateWidgetFromMRMLView()));
   d->ViewNode = viewNode;
-  this->updateWidgetFromMRML();
+  this->updateWidgetFromMRMLView();
+
+  d->CameraNode = d->ViewLogic->GetCameraNode(this->mrmlScene(), d->ThreeDViewLabel.toLatin1());
+  this->qvtkReconnect(d->CameraNode, vtkMRMLCameraNode::CameraInteractionEvent,
+                      this, SLOT(updateViewFromMRMLCamera()));
+
+  this->updateViewFromMRMLCamera();
 }
 
 // --------------------------------------------------------------------------
-void qMRMLThreeDViewControllerWidget::updateWidgetFromMRML()
+void qMRMLThreeDViewControllerWidget::setViewLink(bool linked)
+{
+  if (!this->mrmlScene())
+    {
+    return;
+    }
+
+  vtkCollection* viewNodes = this->mrmlScene()->GetNodesByClass("vtkMRMLViewNode");
+  if (!viewNodes)
+    {
+    return;
+    }
+
+  vtkMRMLViewNode* viewNode = 0;
+  for(viewNodes->InitTraversal();
+      (viewNode = vtkMRMLViewNode::SafeDownCast(
+        viewNodes->GetNextItemAsObject()));)
+    {
+    viewNode->SetLinkedControl(linked);
+    }
+  viewNodes->Delete();
+}
+
+// --------------------------------------------------------------------------
+void qMRMLThreeDViewControllerWidget::updateWidgetFromMRMLView()
 {
   Q_D(qMRMLThreeDViewControllerWidget);
   // Enable buttons
@@ -342,6 +411,18 @@ void qMRMLThreeDViewControllerWidget::updateWidgetFromMRML()
   axesLabels <<  d->ViewNode->GetAxisLabel(3); // +Y
   axesLabels <<  d->ViewNode->GetAxisLabel(2); // -Y
   d->AxesWidget->setAxesLabels(axesLabels);
+
+  // Update view link toggle. Must be done first as its state controls
+  // different behaviors when properties are set.
+  d->ViewLinkButton->setChecked(d->ViewNode->GetLinkedControl());
+  if (d->ViewNode->GetLinkedControl())
+    {
+    d->ViewLinkButton->setIcon(QIcon(":Icons/LinkOn.png"));
+    }
+  else
+    {
+    d->ViewLinkButton->setIcon(QIcon(":Icons/LinkOff.png"));
+    }
 
   d->actionSet3DAxisVisible->setChecked(d->ViewNode->GetBoxVisible());
   d->actionSet3DAxisLabelVisible->setChecked(
@@ -387,6 +468,18 @@ void qMRMLThreeDViewControllerWidget::updateWidgetFromMRML()
 }
 
 // --------------------------------------------------------------------------
+void qMRMLThreeDViewControllerWidget::updateViewFromMRMLCamera()
+{
+  Q_D(qMRMLThreeDViewControllerWidget);
+  if (d->CameraNode)
+    {
+    d->ViewLogic->StartCameraNodeInteraction(vtkMRMLCameraNode::CameraInteractionFlag);
+    d->CameraNode->Modified();
+    d->ViewLogic->EndCameraNodeInteraction();
+    }
+}
+
+// --------------------------------------------------------------------------
 void qMRMLThreeDViewControllerWidget::setQuadBufferStereoSupportEnabled(bool value)
 {
   Q_D(qMRMLThreeDViewControllerWidget);
@@ -394,11 +487,73 @@ void qMRMLThreeDViewControllerWidget::setQuadBufferStereoSupportEnabled(bool val
 }
 
 // --------------------------------------------------------------------------
+vtkMRMLViewLogic* qMRMLThreeDViewControllerWidget::viewLogic() const
+{
+  Q_D(const qMRMLThreeDViewControllerWidget);
+  return d->ViewLogic;
+}
+
+// --------------------------------------------------------------------------
+void qMRMLThreeDViewControllerWidget::setViewLogic(vtkMRMLViewLogic* newViewLogic)
+{
+  Q_D(qMRMLThreeDViewControllerWidget);
+  if (d->ViewLogic == newViewLogic)
+    {
+    return;
+    }
+
+  d->ViewLogic = newViewLogic;
+
+  if (d->ViewLogic && d->ViewLogic->GetMRMLScene())
+    {
+    this->setMRMLScene(d->ViewLogic->GetMRMLScene());
+    }
+}
+
+// --------------------------------------------------------------------------
+void qMRMLThreeDViewControllerWidget::setViewLogics(vtkCollection* viewLogics)
+{
+  Q_D(qMRMLThreeDViewControllerWidget);
+  d->ViewLogics = viewLogics;
+}
+
+// --------------------------------------------------------------------------
+void qMRMLThreeDViewControllerWidget::setMRMLScene(vtkMRMLScene* newScene)
+{
+  Q_D(qMRMLThreeDViewControllerWidget);
+
+  if (this->mrmlScene() == newScene)
+    {
+    return;
+    }
+
+  this->qvtkReconnect(this->mrmlScene(), newScene, vtkMRMLScene::EndBatchProcessEvent,
+                      this, SLOT(updateWidgetFromMRMLView()));
+
+   d->ViewLogic->SetMRMLScene(newScene);
+
+  this->Superclass::setMRMLScene(newScene);
+
+  if (this->mrmlScene())
+   {
+   this->updateWidgetFromMRMLView();
+   }
+}
+
+// --------------------------------------------------------------------------
 void qMRMLThreeDViewControllerWidget::setOrthographicModeEnabled(bool enabled)
 {
   Q_D(qMRMLThreeDViewControllerWidget);
+
+  if (!d->ViewLogic)
+    {
+    return;
+    }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::RenderModeFlag);
   d->ViewNode->SetRenderMode(
     enabled ? vtkMRMLViewNode::Orthographic : vtkMRMLViewNode::Perspective);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -409,7 +564,10 @@ void qMRMLThreeDViewControllerWidget::lookFromAxis(const ctkAxesWidget::Axis& ax
     {
     return;
     }
+
+  d->ViewLogic->StartCameraNodeInteraction(vtkMRMLCameraNode::LookFromAxis);
   d->ThreeDView->lookFromViewAxis(axis);
+  d->ViewLogic->EndCameraNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -453,7 +611,10 @@ void qMRMLThreeDViewControllerWidget::zoomIn()
     {
     return;
     }
+
+  d->ViewLogic->StartCameraNodeInteraction(vtkMRMLCameraNode::ZoomInFlag);
   d->ThreeDView->zoomIn();
+  d->ViewLogic->EndCameraNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -464,7 +625,10 @@ void qMRMLThreeDViewControllerWidget::zoomOut()
     {
     return;
     }
+
+  d->ViewLogic->StartCameraNodeInteraction(vtkMRMLCameraNode::ZoomOutFlag);
   d->ThreeDView->zoomOut();
+  d->ViewLogic->EndCameraNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -487,7 +651,10 @@ void qMRMLThreeDViewControllerWidget::setAnimationMode(int newAnimationMode)
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::AnimationModeFlag);
   d->ViewNode->SetAnimationMode(newAnimationMode);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -498,7 +665,10 @@ void qMRMLThreeDViewControllerWidget::resetFocalPoint()
     {
     return;
     }
+
+  d->ViewLogic->StartCameraNodeInteraction(vtkMRMLCameraNode::CenterFlag);
   d->ThreeDView->resetFocalPoint();
+  d->ViewLogic->EndCameraNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -509,7 +679,10 @@ void qMRMLThreeDViewControllerWidget::set3DAxisVisible(bool visible)
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::BoxVisibleFlag);
   d->ViewNode->SetBoxVisible(visible);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -520,7 +693,10 @@ void qMRMLThreeDViewControllerWidget::set3DAxisLabelVisible(bool visible)
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::BoxLabelVisibileFlag);
   d->ViewNode->SetAxisLabelsVisible(visible);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -531,7 +707,10 @@ void qMRMLThreeDViewControllerWidget::setUseDepthPeeling(bool use)
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::UseDepthPeelingFlag);
   d->ViewNode->SetUseDepthPeeling(use ? 1 : 0);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -542,7 +721,10 @@ void qMRMLThreeDViewControllerWidget::setFPSVisible(bool visible)
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::FPSVisibleFlag);
   d->ViewNode->SetFPSVisible(visible ? 1 : 0);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -579,6 +761,9 @@ void qMRMLThreeDViewControllerWidget::setBackgroundColor(
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::BackgroundColorFlag);
+
   int wasModifying = d->ViewNode->StartModify();
   // The ThreeDView displayable manager will change the background color of
   // the renderer.
@@ -589,6 +774,8 @@ void qMRMLThreeDViewControllerWidget::setBackgroundColor(
     }
   d->ViewNode->SetBackgroundColor2(newColor2.redF(), newColor2.greenF(), newColor2.blueF());
   d->ViewNode->EndModify(wasModifying);
+
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -599,7 +786,10 @@ void qMRMLThreeDViewControllerWidget::setStereoType(int newStereoType)
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::StereoTypeFlag);
   d->ViewNode->SetStereoType(newStereoType);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -610,7 +800,10 @@ void qMRMLThreeDViewControllerWidget::setOrientationMarkerType(int newOrientatio
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::OrientationMarkerTypeFlag);
   d->ViewNode->SetOrientationMarkerType(newOrientationMarkerType);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -621,7 +814,10 @@ void qMRMLThreeDViewControllerWidget::setOrientationMarkerSize(int newOrientatio
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::OrientationMarkerSizeFlag);
   d->ViewNode->SetOrientationMarkerSize(newOrientationMarkerSize);
+  d->ViewLogic->EndViewNodeInteraction();
 }
 
 // --------------------------------------------------------------------------
@@ -632,11 +828,18 @@ void qMRMLThreeDViewControllerWidget::setRulerType(int newRulerType)
     {
     return;
     }
+
+  d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::RulerTypeFlag);
   d->ViewNode->SetRulerType(newRulerType);
+  d->ViewLogic->EndViewNodeInteraction();
+
   // Switch to orthographic render mode automatically if ruler is enabled
-  if (newRulerType!=vtkMRMLViewNode::RulerTypeNone && d->ViewNode->GetRenderMode()!=vtkMRMLViewNode::Orthographic)
+  if (newRulerType!=vtkMRMLViewNode::RulerTypeNone &&
+      d->ViewNode->GetRenderMode()!=vtkMRMLViewNode::Orthographic)
     {
+    d->ViewLogic->StartViewNodeInteraction(vtkMRMLViewNode::RenderModeFlag);
     d->ViewNode->SetRenderMode(vtkMRMLViewNode::Orthographic);
+    d->ViewLogic->EndViewNodeInteraction();
     }
 }
 

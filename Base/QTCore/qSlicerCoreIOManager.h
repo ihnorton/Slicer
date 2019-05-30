@@ -46,6 +46,8 @@ class qSlicerFileWriter;
 class Q_SLICER_BASE_QTCORE_EXPORT qSlicerCoreIOManager:public QObject
 {
   Q_OBJECT;
+  Q_PROPERTY(QString defaultSceneFileType READ defaultSceneFileType WRITE setDefaultSceneFileType)
+
 public:
   qSlicerCoreIOManager(QObject* parent = 0);
   virtual ~qSlicerCoreIOManager();
@@ -145,6 +147,14 @@ public:
   /// and screenShot set as properties.
   Q_INVOKABLE bool saveScene(const QString& fileName, QImage screenShot);
 
+  /// Create default storage nodes for all storable nodes that are to be saved
+  /// with the scene and do not have a storage node already
+  /// File name is set based on node name, using use default file extension,
+  /// with special characters in the node name percent-encoded.
+  /// This method can be used to ensure a storage node exists before writing
+  /// a storable node to file by calling storableNode->GetStorageNode()->WriteData(storableNode).
+  Q_INVOKABLE void addDefaultStorageNodes();
+
   /// Register the reader/writer \a io
   /// Note also that the IOManager takes ownership of \a io
   void registerIO(qSlicerIO* io);
@@ -156,6 +166,16 @@ public:
   /// the qSlicerCoreIOManager. It will emit the signal newFileLoaded().
   /// \sa newFileLoaded()
   Q_INVOKABLE void emitNewFileLoaded(const QVariantMap& loadedFileParameters);
+
+  /// Defines the file format that should be offered by default when the scene is saved.
+  Q_INVOKABLE QString defaultSceneFileType()const;
+
+public slots:
+
+  /// Defines the file format that should be offered by default when the scene is saved.
+  /// Valid options are defined in qSlicerSceneWriter (for example, "MRML Scene (.mrml)"
+  /// or "Medical Reality Bundle (.mrb)").
+  void setDefaultSceneFileType(QString);
 
 signals:
 

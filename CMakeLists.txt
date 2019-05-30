@@ -388,6 +388,7 @@ mark_as_advanced(ADDITIONAL_CXX_FLAGS)
 # CMake Function(s) and Macro(s)
 #-----------------------------------------------------------------------------
 include(CMakeParseArguments)
+include(SlicerMacroBuildScriptedModule)
 include(SlicerMacroGetOperatingSystemArchitectureBitness)
 if(Slicer_BUILD_I18N_SUPPORT)
   include(SlicerMacroTranslation)
@@ -424,12 +425,6 @@ include(SlicerDirectories)
 # Slicer version number
 #-----------------------------------------------------------------------------
 include(SlicerVersion)
-mark_as_superbuild(
-  VARS
-    Slicer_VERSION_MAJOR:STRING
-    Slicer_VERSION_MINOR:STRING
-    Slicer_VERSION_PATCH:STRING
-  )
 
 #-----------------------------------------------------------------------------
 # Extension directories
